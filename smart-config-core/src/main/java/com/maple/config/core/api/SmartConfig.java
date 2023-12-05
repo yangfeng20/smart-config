@@ -1,5 +1,7 @@
 package com.maple.config.core.api;
 
+import com.maple.config.core.model.ConfigEntity;
+
 import java.util.List;
 
 /**
@@ -21,7 +23,9 @@ public interface SmartConfig {
     void registerListener(List<String> packagePathList);
 
 
-    Object configList();
+    List<ConfigEntity> configList();
+
+    boolean containKey(String key);
 
     /**
      * 更改配置

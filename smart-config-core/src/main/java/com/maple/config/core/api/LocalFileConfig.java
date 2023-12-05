@@ -15,7 +15,7 @@ public class LocalFileConfig extends AbsSmartConfig {
     @Override
     boolean isRegister(Field field) {
         // 因为在本地配置中，所有的实例对象都是手动创建，没有容器管理，在更新字段时无法获取到实例对象，所以仅支持静态字段
-        if (Modifier.isStatic(field.getModifiers())) {
+        if (!Modifier.isStatic(field.getModifiers())) {
             return false;
         }
         if (!field.isAnnotationPresent(SmartValue.class)) {
@@ -58,5 +58,10 @@ public class LocalFileConfig extends AbsSmartConfig {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean containKey(String key) {
+        return false;
     }
 }

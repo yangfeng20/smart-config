@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class TestService {
 
-    @SmartValue("test")
+    @SmartValue("test:aaa")
     private static String val;
 
     public void test01(){

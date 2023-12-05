@@ -1,14 +1,15 @@
 package com.maple.config.core.api;
 
+import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.utils.ClassScanner;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author yangfeng
@@ -22,8 +23,17 @@ public abstract class AbsSmartConfig implements SmartConfig {
 
 
     @Override
-    public Object configList() {
-        return null;
+    public List<ConfigEntity> configList() {
+        List<ConfigEntity> list = configObserverMap.entrySet().stream().map(item -> {
+            String val;
+            try {
+                val = (String) item.getValue().get(0).get(null);
+            } catch (IllegalAccessException e) {
+                val = e.getMessage();
+            }
+            return new ConfigEntity(item.getKey(), val);
+        }).collect(Collectors.toList());
+        return list;
     }
 
     @Override
@@ -73,7 +83,7 @@ public abstract class AbsSmartConfig implements SmartConfig {
                 }
 
                 String configKey = getKey(field);
-                if (configKey == null){
+                if (configKey == null) {
                     continue;
                 }
                 setDefaultVal(field);

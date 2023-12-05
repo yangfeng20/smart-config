@@ -2,10 +2,9 @@ package com.maple.config.test;
 
 import com.maple.config.core.api.LocalFileConfig;
 import com.maple.config.core.api.SmartConfig;
-import com.maple.config.core.utils.ClassScanner;
+import com.maple.config.core.web.ServerBootstrap;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author yangfeng
@@ -15,7 +14,7 @@ import java.util.List;
 
 public class TestMain {
     public static void main(String[] args) throws Exception {
-        SmartConfig smartConfig = new LocalFileConfig();
+        final SmartConfig smartConfig = new LocalFileConfig();
         ArrayList<String> list = new ArrayList<>();
         list.add("com.maple.config.test");
         smartConfig.registerListener(list);
@@ -26,5 +25,13 @@ public class TestMain {
 
         smartConfig.changeConfig("test", "2222");
         service.test01();
+
+        new Thread(() -> {
+            try {
+                new ServerBootstrap(smartConfig).start();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
     }
 }
