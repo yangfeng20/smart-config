@@ -12,7 +12,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -27,6 +26,8 @@ public abstract class AbsSmartConfig implements SmartConfig {
     protected Map<String, ConfigEntity> configEntityMap = new HashMap<>();
 
     protected Map<String, List<Field>> configObserverMap = new HashMap<>();
+
+    protected Collection<String> waitReleaseConfigKeyList = new ArrayList<>();
 
     // 配置描述推断
     private final boolean descInfer;
@@ -151,6 +152,10 @@ public abstract class AbsSmartConfig implements SmartConfig {
         // 获取所有的瞬时配置
         List<ConfigEntity> instantConfigList = new ArrayList<>();
         for (String key : difference) {
+            // 过滤瞬时配置在页面更新之后的key【已页面为最新配置】
+            if (waitReleaseConfigKeyList.contains(key)){
+                continue;
+            }
             Field field = configObserverMap.get(key).get(0);
             field.setAccessible(true);
             String value;
@@ -168,31 +173,55 @@ public abstract class AbsSmartConfig implements SmartConfig {
     }
 
     @Override
+    public void release(List<String> keyList) {
+        for (String key : keyList) {
+            for (Field field : configObserverMap.get(key)) {
+                field.setAccessible(true);
+                try {
+                    // todo 没有实例对象，仅支持静态字段
+                    // todo 空指针
+                    field.set(null, configEntityMap.get(key).getValue());
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void addConfig(String key, String value) {
+
+    }
+
+    @Override
     public void changeConfig(String key, String value) {
         if (!this.containKey(key)) {
             return;
         }
+        waitReleaseConfigKeyList.add(key);
 
-        for (Field field : configObserverMap.get(key)) {
-            field.setAccessible(true);
-            try {
-                // todo 没有实例对象，仅支持静态字段
-                field.set(null, value);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        if (configEntityMap.containsKey(key)) {
+            ConfigEntity configEntity = configEntityMap.get(key);
+            configEntity.setValue(value);
+            configEntity.setUpdateDate(new Date());
+            configEntity.setStatus(ReleaseStatusEnum.NOT_RELEASE.getCode());
 
-        ConfigEntity configEntity = configEntityMap.get(key);
-        if (configEntity == null) {
             return;
         }
-        configEntity.setValue(value);
-        configEntity.setUpdateDate(new Date());
 
+        // 以下仅为瞬时配置
+        ConfigEntity instantConfigEntity = new ConfigEntity(key, value, ReleaseStatusEnum.NOT_RELEASE.getCode());
+        instantConfigEntity.setUpdateDate(new Date());
+        configEntityMap.put(key, instantConfigEntity);
     }
 
 
+    /**
+     * 当前字段是否注册观察者
+     *
+     * @param field field
+     * @return boolean
+     */
     abstract boolean isRegister(Field field);
 
 
