@@ -14,16 +14,16 @@ import java.util.ArrayList;
 
 public class TestMain {
     public static void main(String[] args) throws Exception {
-        final SmartConfig smartConfig = new LocalFileConfig();
+        final SmartConfig smartConfig = new LocalFileConfig(true);
         ArrayList<String> list = new ArrayList<>();
         list.add("com.maple.config.test");
-        smartConfig.registerListener(list);
+        smartConfig.init(list, "application.properties");
 
         TestService service = new TestService();
         service.test01();
 
 
-        smartConfig.changeConfig("test", "2222");
+        smartConfig.changeConfig("aaa", "222");
         service.test01();
 
         new Thread(() -> {

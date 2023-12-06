@@ -34,7 +34,9 @@
 	<tr>
 		<th>Key</th>
 		<th>Value</th>
+		<th>Desc</th>
 		<th>Status</th>
+		<th>Durable</th>
 		<th>Create Date</th>
 		<th>Update Date</th>
 		<th>Action</th>
@@ -57,7 +59,9 @@
 		<tr>
 			<td>${config.key}</td>
 			<td>${config.value}</td>
+			<td>${config.desc}</td>
 			<td>${config.status}</td>
+			<td>${config.durable}</td>
 			<td>${config.createDate}</td>
 			<td>${config.updateDate}</td>
 			<td>

@@ -14,8 +14,13 @@ import java.util.ArrayList;
 
 public class TestService {
 
-    @SmartValue("test:aaa")
+    @SmartValue("aaa:111")
     private static String val;
+    @SmartValue("bbb:字段值")
+    private static String val1;
+
+    @SmartValue("ddd:444")
+    private static String val2;
 
     public void test01(){
         System.out.println(val);

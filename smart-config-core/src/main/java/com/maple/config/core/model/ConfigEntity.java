@@ -18,12 +18,22 @@ public class ConfigEntity {
 
     private Integer status;
 
+    private boolean durable;
+
     private Date createDate;
     private Date updateDate;
 
     public ConfigEntity(String key, String value) {
         this.key = key;
         this.value = value;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 
     public String getKey() {
@@ -64,5 +74,13 @@ public class ConfigEntity {
 
     public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
+    }
+
+    public Boolean getDurable() {
+        return durable;
+    }
+
+    public void setDurable(boolean durable) {
+        this.durable = durable;
     }
 }
