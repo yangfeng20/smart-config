@@ -23,9 +23,10 @@ public class ConfigEntity {
     private Date createDate;
     private Date updateDate;
 
-    public ConfigEntity(String key, String value) {
+    public ConfigEntity(String key, String value, Integer releaseStatus) {
         this.key = key;
         this.value = value;
+        this.status = releaseStatus;
     }
 
     public String getDesc() {

@@ -29,7 +29,7 @@ public abstract class AbsSmartConfig implements SmartConfig {
     protected Map<String, List<Field>> configObserverMap = new HashMap<>();
 
     // 配置描述推断
-    private boolean descInfer;
+    private final boolean descInfer;
 
     public AbsSmartConfig(boolean descInfer) {
         this.descInfer = descInfer;
@@ -84,9 +84,8 @@ public abstract class AbsSmartConfig implements SmartConfig {
             String key = strArr[0].trim();
             String value = strArr[1].trim();
 
-            ConfigEntity configEntity = new ConfigEntity(key, value);
+            ConfigEntity configEntity = new ConfigEntity(key, value, ReleaseStatusEnum.RELEASE.getCode());
             configEntity.setDesc(desc);
-            configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
             configEntity.setCreateDate(createDate);
             configEntity.setDurable(true);
             configEntityList.add(configEntity);
@@ -144,35 +143,28 @@ public abstract class AbsSmartConfig implements SmartConfig {
 
     @Override
     public Collection<ConfigEntity> configList() {
-        Set<String> difference = new HashSet<>(configEntityMap.keySet());
-        difference.removeAll(configObserverMap.keySet());
 
-        // 仅本地文件中有未使用的key
-        List<ConfigEntity> list = configObserverMap.entrySet().stream().map(item -> {
-            String configKey = item.getKey();
-            String val;
-            try {
-                Field field = item.getValue().get(0);
-                field.setAccessible(true);
-                val = (String) field.get(null);
-            } catch (IllegalAccessException e) {
-                val = e.getMessage();
-            }
+        // configEntityMap - configObserverMap 的差集 【仅在字段注解上存在的key】
+        Set<String> difference = new HashSet<>(configObserverMap.keySet());
+        difference.removeAll(configEntityMap.keySet());
 
-            // 即时配置构造器
-            BiFunction<String, String, ConfigEntity> instantConfigEntitySupplier = (key, value) -> {
-                ConfigEntity configEntity = new ConfigEntity(key, value);
-                configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
-                return configEntity;
-            };
-
-            return configEntityMap.getOrDefault(configKey, instantConfigEntitySupplier.apply(configKey, val));
-        }).collect(Collectors.toList());
-
+        // 获取所有的瞬时配置
+        List<ConfigEntity> instantConfigList = new ArrayList<>();
         for (String key : difference) {
-            list.add(configEntityMap.get(key));
+            Field field = configObserverMap.get(key).get(0);
+            field.setAccessible(true);
+            String value;
+            try {
+                value = (String) field.get(null);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+            instantConfigList.add(new ConfigEntity(key, value, ReleaseStatusEnum.RELEASE.getCode()));
         }
-        return list;
+
+        ArrayList<ConfigEntity> result = new ArrayList<>(configEntityMap.values());
+        result.addAll(instantConfigList);
+        return result;
     }
 
     @Override
