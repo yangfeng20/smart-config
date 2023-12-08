@@ -29,6 +29,12 @@
 	</style>
 </head>
 <body>
+
+<button>添加配置</button>
+<br>
+<button>发布</button>
+
+<br>
 <table>
 	<thead>
 	<tr>
@@ -43,17 +49,6 @@
 	</tr>
 	</thead>
 	<tbody>
-	<!-- Replace the following rows with actual data using a server-side template engine -->
-	<%--	<tr>--%>
-	<%--		<td>${config.key}</td>--%>
-	<%--		<td>${config.value}</td>--%>
-	<%--		<td>${config.status}</td>--%>
-	<%--		<td>${config.createDate}</td>--%>
-	<%--		<td>${config.updateDate}</td>--%>
-	<%--		<td>--%>
-	<%--			<button onclick="editData('${config.key}')">Edit</button>--%>
-	<%--		</td>--%>
-	<%--	</tr>--%>
 
 	<c:forEach items="${requestScope.configList}" var="config">
 		<tr>

@@ -153,7 +153,7 @@ public abstract class AbsSmartConfig implements SmartConfig {
         List<ConfigEntity> instantConfigList = new ArrayList<>();
         for (String key : difference) {
             // 过滤瞬时配置在页面更新之后的key【已页面为最新配置】
-            if (waitReleaseConfigKeyList.contains(key)){
+            if (waitReleaseConfigKeyList.contains(key)) {
                 continue;
             }
             Field field = configObserverMap.get(key).get(0);
@@ -190,7 +190,12 @@ public abstract class AbsSmartConfig implements SmartConfig {
 
     @Override
     public void addConfig(String key, String value) {
+        if (this.containKey(key)) {
+            return;
+        }
 
+        ConfigEntity configEntity = new ConfigEntity(key, value, ReleaseStatusEnum.NOT_RELEASE.getCode());
+        configEntityMap.put(key, configEntity);
     }
 
     @Override
