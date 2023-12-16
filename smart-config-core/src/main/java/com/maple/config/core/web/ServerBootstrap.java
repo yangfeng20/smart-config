@@ -6,6 +6,7 @@ import com.maple.config.core.web.filter.GlobalFilter;
 import com.maple.config.core.web.servlet.EditConfigServlet;
 import com.maple.config.core.web.servlet.HelloServlet;
 import com.maple.config.core.web.servlet.ListConfigServlet;
+import com.maple.config.core.web.servlet.ReleaseConfigServlet;
 import org.apache.tomcat.util.descriptor.web.JspPropertyGroup;
 import org.apache.tomcat.util.descriptor.web.JspPropertyGroupDescriptorImpl;
 import org.apache.tomcat.util.scan.StandardJarScanner;
@@ -38,7 +39,7 @@ public class ServerBootstrap {
     private WebAppContext webAppContext;
 
     public ServerBootstrap(SmartConfig smartConfig) {
-        if (smartConfig == null){
+        if (smartConfig == null) {
             throw new IllegalArgumentException();
         }
         this.smartConfig = smartConfig;
@@ -78,6 +79,7 @@ public class ServerBootstrap {
     public void addServlet() {
         webAppContext.addServlet(new ServletHolder(new ListConfigServlet(this.smartConfig)), "/list");
         webAppContext.addServlet(new ServletHolder(new EditConfigServlet(this.smartConfig)), "/edit");
+        webAppContext.addServlet(new ServletHolder(new ReleaseConfigServlet(this.smartConfig)), "/release");
     }
 
 

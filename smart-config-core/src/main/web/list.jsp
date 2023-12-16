@@ -1,5 +1,9 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
 <html>
 <head>
 	<script src="./static/bootstrap.min.js"></script>
@@ -8,11 +12,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>配置列表</title>
 	<style>
-        /* 样式仅为演示目的，可根据需要自行修改 */
-        .config-item {
-            margin-bottom: 10px;
-        }
-
         .edit-form {
             display: none;
             position: fixed;
@@ -22,7 +21,7 @@
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
         }
 
         .edit-form label {
@@ -50,7 +49,7 @@
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
-            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
         }
 	</style>
 </head>
@@ -59,11 +58,11 @@
 <body>
 <div class="container">
 	<div style="margin-bottom: 10px">
-		<a class="btn btn-success" href="#">
+		<a class="btn btn-success" onclick="editConfig(null)">
 			<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
 			添加配置
 		</a>
-		<a class="btn btn-success" href="#">
+		<a class="btn btn-success" onclick="releaseConfig()">
 			<span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
 			发布配置
 		</a>
@@ -73,14 +72,6 @@
 			<span class="glyphicon glyphicon-th" aria-hidden="true"></span>
 			配置列表
 		</div>
-
-		<button type="button" class="btn btn-default" aria-label="Left Align">
-			<span class="glyphicon glyphicon-align-left" aria-hidden="true"></span>
-		</button>
-
-		<button type="button" class="btn btn-default btn-lg">
-			<span class="glyphicon glyphicon-star" aria-hidden="true"></span> Star
-		</button>
 
 		<table class="table table-striped table-hover">
 			<thead>
@@ -134,11 +125,61 @@
 
 <script>
 
+    function releaseConfig() {
+
+        fetch('<%=basePath%>release', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                'credentials': 'include'
+            },
+            body: ""
+        })
+            .then(response => {
+                if (response.ok) {
+                    const successMessage = document.getElementById('successMessage');
+                    successMessage.style.background = '#5cb85c'
+                    successMessage.innerText = '保存成功';
+                    successMessage.style.display = 'block';
+
+                    setTimeout(() => {
+                        location.reload()
+                    }, 2000);
+                } else {
+                    const successMessage = document.getElementById('successMessage');
+                    response.text().then(result => {
+                        successMessage.style.background = 'red'
+                        successMessage.innerText = '保存失败: ' + result;
+                        successMessage.style.display = 'block';
+                    })
+                }
+            })
+            .catch(error => {
+                console.error('保存失败:', error);
+            }).finally(() => {
+            // 自动隐藏保存成功提示
+            setTimeout(() => {
+                const successMessage = document.getElementById('successMessage');
+                successMessage.style.display = 'none';
+            }, 2000);
+        });
+    }
+
     function editConfig(key) {
+
         // 显示编辑表单
         document.getElementById('editForm').style.display = 'block';
         // 设置Key值
-        document.getElementById('key').value = key;
+        let keyInput = document.getElementById('key');
+        keyInput.value = key;
+        if (key === null) {
+            // 移除 readonly 和 disabled 属性
+            keyInput.removeAttribute('readonly');
+            keyInput.removeAttribute('disabled');
+        } else {
+            keyInput.setAttribute('readonly', '');
+            keyInput.setAttribute('disabled', '');
+        }
 
         // 监听 ESC 按键事件关闭表单
         document.addEventListener('keydown', function (event) {
@@ -157,36 +198,32 @@
         const key = document.getElementById('key').value;
         const value = document.getElementById('value').value;
 
-        // 模拟后端保存，实际需替换为调用后端接口
-        saveConfigToBackend(key, value);
 
+        let keyInput = document.getElementById('key');
+        const isReadOnly = keyInput.getAttribute('readonly');
+        const isDisabled = keyInput.getAttribute('disabled');
+        let isCreate = false;
+        if (isReadOnly === null && isDisabled === null) {
+            isCreate = true;
+        }
+
+        saveConfigToBackend(key, value, isCreate);
     }
 
-    // 模拟从后端获取数据的函数
-    function getConfigValueFromBackend(key) {
-        // 这里模拟数据源，实际中需要使用适当的方法从后端获取数据
-        const configData = {
-            'ConfigKey1': 'Value1',
-            'ConfigKey2': 'Value2'
-        };
-        return configData[key] || '';
-    }
-
-    // 模拟保存数据到后端的函数
     function saveConfigToBackend(key, value, isCreate) {
         const data = `key=\${key}&value=\${value}&isCreate=\${isCreate}`;
-        // 这里模拟向后端保存数据的行为，实际中需要使用适当的后端接口
-        fetch('http://localhost:8080/edit', {
+        fetch('<%=basePath%>edit', {
             method: 'POST',
-            headers:{
-                'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8',
-                'credentials':'include'
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                'credentials': 'include'
             },
             body: data
         })
             .then(response => {
                 if (response.ok) {
                     const successMessage = document.getElementById('successMessage');
+                    successMessage.style.background = '#5cb85c'
                     successMessage.innerText = '保存成功';
                     successMessage.style.display = 'block';
 
@@ -195,8 +232,11 @@
                     }, 2000)
                 } else {
                     const successMessage = document.getElementById('successMessage');
-                    successMessage.innerText = '保存失败';
-                    successMessage.style.display = 'block';
+                    response.text().then(result => {
+                        successMessage.style.background = 'red'
+                        successMessage.innerText = '保存失败: ' + result;
+                        successMessage.style.display = 'block';
+                    })
                 }
             })
             .catch(error => {
@@ -207,6 +247,7 @@
 
             // 自动隐藏保存成功提示
             setTimeout(() => {
+                const successMessage = document.getElementById('successMessage');
                 successMessage.style.display = 'none';
             }, 2000);
         });

@@ -92,6 +92,6 @@ public interface SmartConfig {
      *
      * @param keyList key列表 仅发布指定的key
      */
-    void release(List<String> keyList);
+    void release(Collection<String> keyList);
 
 }

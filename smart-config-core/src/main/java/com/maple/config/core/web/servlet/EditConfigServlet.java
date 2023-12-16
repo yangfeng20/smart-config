@@ -10,10 +10,9 @@ import java.io.IOException;
 
 /**
  * @author yangfeng
- * @date : 2023/12/5 20:49
+ * @since : 2023/12/5 20:49
  * desc:
  */
-
 public class EditConfigServlet extends HttpServlet {
 
     private final SmartConfig smartConfig;
@@ -26,12 +25,16 @@ public class EditConfigServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String key = req.getParameter("key");
         String value = req.getParameter("value");
-        String isCreate = req.getParameter("isCreate");
-        if (!Boolean.parseBoolean(isCreate) && !smartConfig.containKey(key)){
-            // todo 结束
+        String isCreateStr = req.getParameter("isCreate");
+        boolean isCreate = Boolean.parseBoolean(isCreateStr);
+        if (!isCreate && !smartConfig.containKey(key)) {
             throw new IllegalArgumentException();
         }
-        // todo value应该是复杂对象，而不是简单的value【在properties文件中要如何存储注释】
+
+        if (isCreate) {
+            smartConfig.addConfig(key, value);
+            return;
+        }
         smartConfig.changeConfig(key, value);
     }
 }

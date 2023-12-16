@@ -22,8 +22,9 @@ public class TestMain {
         TestService service = new TestService();
         service.test01();
 
-
+        // 修改后未发布
         smartConfig.changeConfig("aaa", "222");
+        //smartConfig.release(null);
         service.test01();
 
         new Thread(() -> {

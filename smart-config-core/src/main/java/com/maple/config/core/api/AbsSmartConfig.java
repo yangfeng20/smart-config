@@ -7,17 +7,19 @@ import com.maple.config.core.utils.ClassScanner;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * @author yangfeng
- * @date : 2023/12/1 17:15
+ * @since : 2023/12/1 17:15
  * desc:
  */
 
@@ -27,7 +29,7 @@ public abstract class AbsSmartConfig implements SmartConfig {
 
     protected Map<String, List<Field>> configObserverMap = new HashMap<>();
 
-    protected Collection<String> waitReleaseConfigKeyList = new ArrayList<>();
+    protected Collection<String> waitReleaseConfigKeyList = new CopyOnWriteArrayList<>();
 
     // 配置描述推断
     private final boolean descInfer;
@@ -61,7 +63,11 @@ public abstract class AbsSmartConfig implements SmartConfig {
         List<String> lineDataList;
         try {
             // todo 路径适配问题
-            String basePath = URLDecoder.decode(this.getClass().getResource("/").getPath(), "utf-8").substring(1);
+            URL resource = this.getClass().getResource("/");
+            if (resource == null) {
+                throw new RuntimeException("获取路径url为空");
+            }
+            String basePath = URLDecoder.decode(resource.getPath(), "utf-8").substring(1);
             lineDataList = Files.readAllLines(Paths.get(basePath + localConfigPath), Charset.defaultCharset());
         } catch (IOException e) {
             throw new RuntimeException("加载本地配置文件失败", e);
@@ -173,29 +179,41 @@ public abstract class AbsSmartConfig implements SmartConfig {
     }
 
     @Override
-    public void release(List<String> keyList) {
+    public void release(Collection<String> keyList) {
+        if (keyList == null || keyList.isEmpty()) {
+            keyList = waitReleaseConfigKeyList;
+        }
+
         for (String key : keyList) {
-            for (Field field : configObserverMap.get(key)) {
+            List<Field> fieldList = configObserverMap.get(key);
+            if (fieldList == null || fieldList.isEmpty()) {
+                // 当前配置还未添加到字段上，没有对应的观察者
+                continue;
+            }
+            for (Field field : fieldList) {
                 field.setAccessible(true);
                 try {
-                    // todo 没有实例对象，仅支持静态字段
-                    // todo 空指针
-                    field.set(null, configEntityMap.get(key).getValue());
+                    ConfigEntity configEntity = configEntityMap.get(key);
+                    field.set(null, configEntity.getValue());
+                    configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
             }
+            keyList.remove(key);
         }
     }
 
     @Override
     public void addConfig(String key, String value) {
         if (this.containKey(key)) {
-            return;
+            throw new RuntimeException("配置key已存在，无法添加");
         }
 
         ConfigEntity configEntity = new ConfigEntity(key, value, ReleaseStatusEnum.NOT_RELEASE.getCode());
+        configEntity.setCreateDate(new Date());
         configEntityMap.put(key, configEntity);
+        waitReleaseConfigKeyList.add(key);
     }
 
     @Override
