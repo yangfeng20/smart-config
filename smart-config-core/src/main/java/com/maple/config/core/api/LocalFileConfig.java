@@ -64,7 +64,7 @@ public class LocalFileConfig extends AbsSmartConfig {
             throw new RuntimeException(e);
         }
 
-// 字段注解上没有默认值，取本地配置文件的value
+        // 字段注解上没有默认值，取本地配置文件的value
         String newValue = value;
         String[] split = annotationVal.split(":");
         if (split.length != 0) {
