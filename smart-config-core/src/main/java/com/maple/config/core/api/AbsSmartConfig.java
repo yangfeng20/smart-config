@@ -31,6 +31,8 @@ public abstract class AbsSmartConfig implements SmartConfig {
 
     protected Collection<String> waitReleaseConfigKeyList = new CopyOnWriteArrayList<>();
 
+    protected Map<String, List<String>> beanKeyNameMap;
+
     // 配置描述推断
     private final boolean descInfer;
 
@@ -56,7 +58,15 @@ public abstract class AbsSmartConfig implements SmartConfig {
 
         this.loadLocalFileConfig(localConfigPath);
         this.registerListener(scannerResult);
+
+        customInit();
+
         this.initDefaultValue();
+    }
+
+    private void customInit(){
+        SpringBeanKeyRegister springBeanKeyRegister = SpringContext.getBean(SpringBeanKeyRegister.class);
+        beanKeyNameMap = springBeanKeyRegister.getBeanKeyMap();
     }
 
     public void loadLocalFileConfig(String localConfigPath) {
@@ -166,7 +176,7 @@ public abstract class AbsSmartConfig implements SmartConfig {
             field.setAccessible(true);
             String value;
             try {
-                value = (String) field.get(null);
+                value = (String) field.get(getObjectByKey(key));
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
@@ -177,6 +187,8 @@ public abstract class AbsSmartConfig implements SmartConfig {
         result.addAll(instantConfigList);
         return result;
     }
+
+    public abstract Object getObjectByKey(String key);
 
     @Override
     public void release(Collection<String> keyList) {
@@ -194,7 +206,7 @@ public abstract class AbsSmartConfig implements SmartConfig {
                 field.setAccessible(true);
                 try {
                     ConfigEntity configEntity = configEntityMap.get(key);
-                    field.set(null, configEntity.getValue());
+                    field.set(getObjectByKey(key), configEntity.getValue());
                     configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);

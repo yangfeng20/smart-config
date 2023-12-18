@@ -48,7 +48,8 @@ public class ServerBootstrap {
     public void start() throws Exception {
         Server server = new Server(8080);
         webAppContext = new WebAppContext();
-        webAppContext.setResourceBase("./src/main/web");
+        // todo 地址动态获取，当前项目地址，以及jsp文件拷贝
+        webAppContext.setResourceBase("./smart-config-core/src/main/web");
         webAppContext.setDisplayName("smart-config");
         webAppContext.setClassLoader(Thread.currentThread().getContextClassLoader());
         webAppContext.setConfigurationDiscovered(true);

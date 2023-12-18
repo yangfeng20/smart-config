@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class SpringBootConfig extends AbsSmartConfig {
 
-    private Map<String, List<String>> beanKeyNameMap;
+
 
     public SpringBootConfig(boolean descInfer) {
         super(descInfer);
@@ -26,9 +26,6 @@ public class SpringBootConfig extends AbsSmartConfig {
     @Override
     public void init(List<String> packagePathList, String localConfigPath) {
         super.init(packagePathList, localConfigPath);
-
-        SpringBeanKeyRegister springBeanKeyRegister = SpringContext.getBean(SpringBeanKeyRegister.class);
-        beanKeyNameMap = springBeanKeyRegister.getBeanKeyMap();
     }
 
     @Override
@@ -92,5 +89,10 @@ public class SpringBootConfig extends AbsSmartConfig {
         return beanNameList.stream()
                 .map(SpringContext::getBean)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Object getObjectByKey(String key) {
+        return getBeanByKey(key);
     }
 }

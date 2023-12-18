@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author maple
@@ -20,6 +22,8 @@ public class SpringBeanKeyRegister implements BeanPostProcessor {
 
     private final Map<String, List<String>> beanKeyMap = new ConcurrentHashMap<>();
 
+    private final static Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([^}]*)}");
+
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         Class<?> clazz = bean.getClass();
@@ -30,17 +34,16 @@ public class SpringBeanKeyRegister implements BeanPostProcessor {
             if (annotation == null){
                 continue;
             }
-
-            String value = annotation.value();
-            String[] split = value.split(":");
-            if (split.length != 0) {
-                // 优先获取字段注解上的值
-                value = split[1];
+            Matcher matcher = PLACEHOLDER_PATTERN.matcher(annotation.value());
+            if (!matcher.find()){
+                continue;
             }
+            String value = matcher.group(1);
+            String configKey = value.split(":")[0];
 
-            List<String> beanNameList = beanKeyMap.getOrDefault(value, new ArrayList<>());
+            List<String> beanNameList = beanKeyMap.getOrDefault(configKey, new ArrayList<>());
             beanNameList.add(beanName);
-            beanKeyMap.put(value, beanNameList);
+            beanKeyMap.put(configKey, beanNameList);
         }
         return BeanPostProcessor.super.postProcessBeforeInitialization(bean, beanName);
     }

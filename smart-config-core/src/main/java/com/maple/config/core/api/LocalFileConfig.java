@@ -87,4 +87,10 @@ public class LocalFileConfig extends AbsSmartConfig {
     Class<? extends Annotation> getFieldAnnotation() {
         return SmartValue.class;
     }
+
+
+    @Override
+    public Object getObjectByKey(String key) {
+        return null;
+    }
 }
