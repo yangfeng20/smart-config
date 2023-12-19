@@ -1,6 +1,7 @@
-package com.maple.config.core.api;
+package com.maple.config.core.api.impl.local;
 
 import com.maple.config.core.annotation.SmartValue;
+import com.maple.config.core.api.AbsSmartConfig;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -19,7 +20,7 @@ public class LocalFileConfig extends AbsSmartConfig {
     }
 
     @Override
-    boolean isRegister(Field field) {
+    protected boolean isRegister(Field field) {
         // 因为在本地配置中，所有的实例对象都是手动创建，没有容器管理，在更新字段时无法获取到实例对象，所以仅支持静态字段
         if (!Modifier.isStatic(field.getModifiers())) {
             return false;
@@ -34,7 +35,7 @@ public class LocalFileConfig extends AbsSmartConfig {
     }
 
     @Override
-    String getKey(Field field) {
+    protected String getKey(Field field) {
         SmartValue annotation = field.getAnnotation(SmartValue.class);
         if (annotation == null) {
             return null;
@@ -47,7 +48,7 @@ public class LocalFileConfig extends AbsSmartConfig {
     }
 
     @Override
-    String propertyInject(Field field, String value) {
+    protected String propertyInject(Field field, String value) {
         Annotation annotation = field.getAnnotation(getFieldAnnotation());
         if (annotation == null) {
             return null;
@@ -84,10 +85,15 @@ public class LocalFileConfig extends AbsSmartConfig {
     }
 
     @Override
-    Class<? extends Annotation> getFieldAnnotation() {
+    protected Class<? extends Annotation> getFieldAnnotation() {
         return SmartValue.class;
     }
 
+
+    @Override
+    protected void customInit() {
+
+    }
 
     @Override
     public Object getObjectByKey(String key) {

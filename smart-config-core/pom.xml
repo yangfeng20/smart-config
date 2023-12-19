@@ -53,5 +53,16 @@
     </dependencies>
 
 
+    <build>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/web</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+
 
 </project>

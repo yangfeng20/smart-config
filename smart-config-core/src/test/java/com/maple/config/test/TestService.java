@@ -1,10 +1,6 @@
 package com.maple.config.test;
 
 import com.maple.config.core.annotation.SmartValue;
-import com.maple.config.core.api.LocalFileConfig;
-import com.maple.config.core.api.SmartConfig;
-
-import java.util.ArrayList;
 
 /**
  * @author yangfeng

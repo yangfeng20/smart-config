@@ -1,6 +1,6 @@
 package com.maple.config.test;
 
-import com.maple.config.core.api.LocalFileConfig;
+import com.maple.config.core.api.impl.local.LocalFileConfig;
 import com.maple.config.core.api.SmartConfig;
 import com.maple.config.core.web.ServerBootstrap;
 

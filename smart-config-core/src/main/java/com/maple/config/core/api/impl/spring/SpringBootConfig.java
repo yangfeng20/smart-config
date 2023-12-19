@@ -1,12 +1,13 @@
-package com.maple.config.core.api;
+package com.maple.config.core.api.impl.spring;
 
+import com.maple.config.core.api.AbsSmartConfig;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 /**
@@ -16,7 +17,6 @@ import java.util.stream.Collectors;
  */
 
 public class SpringBootConfig extends AbsSmartConfig {
-
 
 
     public SpringBootConfig(boolean descInfer) {
@@ -29,7 +29,13 @@ public class SpringBootConfig extends AbsSmartConfig {
     }
 
     @Override
-    boolean isRegister(Field field) {
+    protected void customInit() {
+        SpringBeanKeyRegister springBeanKeyRegister = SpringContext.getBean(SpringBeanKeyRegister.class);
+        beanKeyNameMap = springBeanKeyRegister.getBeanKeyMap();
+    }
+
+    @Override
+    protected boolean isRegister(Field field) {
         Value annotation = field.getAnnotation(Value.class);
         if (annotation == null) {
             return false;
@@ -39,20 +45,22 @@ public class SpringBootConfig extends AbsSmartConfig {
     }
 
     @Override
-    String getKey(Field field) {
+    protected String getKey(Field field) {
         Value annotation = field.getAnnotation(Value.class);
         if (annotation == null) {
             return null;
         }
-        String[] split = annotation.value().split(":");
-        if (split.length == 0) {
-            return annotation.value();
+
+        Matcher matcher = SpringBeanKeyRegister.PLACEHOLDER_PATTERN.matcher(annotation.value());
+        if (!matcher.find()) {
+            return null;
         }
-        return split[0];
+        String value = matcher.group(1);
+        return value.split(":")[0];
     }
 
     @Override
-    String propertyInject(Field field, String value) {
+    protected String propertyInject(Field field, String value) {
         String configKey = getKey(field);
         List<Object> waitUpdateFieldBeanList = getBeanByKey(configKey);
         for (Object bean : waitUpdateFieldBeanList) {
@@ -68,7 +76,7 @@ public class SpringBootConfig extends AbsSmartConfig {
     }
 
     @Override
-    Class<? extends Annotation> getFieldAnnotation() {
+    protected Class<? extends Annotation> getFieldAnnotation() {
         return Value.class;
     }
 
@@ -77,7 +85,7 @@ public class SpringBootConfig extends AbsSmartConfig {
             return Collections.emptyList();
         }
 
-        if (beanKeyNameMap == null){
+        if (beanKeyNameMap == null) {
             throw new RuntimeException("未初始化beanKey注册器");
         }
 

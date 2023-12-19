@@ -1,10 +1,8 @@
-package com.maple.config.core.api;
+package com.maple.config.core.api.impl.spring;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-
-import java.util.Map;
 
 /**
  * @author maple

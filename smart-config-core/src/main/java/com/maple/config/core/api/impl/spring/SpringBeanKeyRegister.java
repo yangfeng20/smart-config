@@ -1,4 +1,4 @@
-package com.maple.config.core.api;
+package com.maple.config.core.api.impl.spring;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +22,7 @@ public class SpringBeanKeyRegister implements BeanPostProcessor {
 
     private final Map<String, List<String>> beanKeyMap = new ConcurrentHashMap<>();
 
-    private final static Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([^}]*)}");
+    final static Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([^}]*)}");
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {

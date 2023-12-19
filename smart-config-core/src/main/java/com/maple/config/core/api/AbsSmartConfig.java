@@ -64,10 +64,7 @@ public abstract class AbsSmartConfig implements SmartConfig {
         this.initDefaultValue();
     }
 
-    private void customInit(){
-        SpringBeanKeyRegister springBeanKeyRegister = SpringContext.getBean(SpringBeanKeyRegister.class);
-        beanKeyNameMap = springBeanKeyRegister.getBeanKeyMap();
-    }
+    protected abstract void customInit();
 
     public void loadLocalFileConfig(String localConfigPath) {
         List<String> lineDataList;
@@ -99,7 +96,13 @@ public abstract class AbsSmartConfig implements SmartConfig {
 
             String[] strArr = lineStr.split("=");
             String key = strArr[0].trim();
-            String value = strArr[1].trim();
+            String value;
+            // 配置文件不规范，只有=号，没有后面的值
+            if (strArr.length < 2) {
+                value = "";
+            } else {
+                value = strArr[1].trim();
+            }
 
             ConfigEntity configEntity = new ConfigEntity(key, value, ReleaseStatusEnum.RELEASE.getCode());
             configEntity.setDesc(desc);
@@ -174,13 +177,23 @@ public abstract class AbsSmartConfig implements SmartConfig {
             }
             Field field = configObserverMap.get(key).get(0);
             field.setAccessible(true);
-            String value;
+            Object keyLinkObject = getObjectByKey(key);
+            StringBuilder value = new StringBuilder();
             try {
-                value = (String) field.get(getObjectByKey(key));
+
+                if (keyLinkObject instanceof List) {
+                    List<?> list = (List<?>) keyLinkObject;
+                    // spring项目同一个key多个不同的默认值
+                    for (Object obj : list) {
+                        value.append(field.get(obj)).append(" | ");
+                    }
+                } else {
+                    value.append(field.get(keyLinkObject));
+                }
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
-            instantConfigList.add(new ConfigEntity(key, value, ReleaseStatusEnum.RELEASE.getCode()));
+            instantConfigList.add(new ConfigEntity(key, value.toString(), ReleaseStatusEnum.RELEASE.getCode()));
         }
 
         ArrayList<ConfigEntity> result = new ArrayList<>(configEntityMap.values());
@@ -206,7 +219,14 @@ public abstract class AbsSmartConfig implements SmartConfig {
                 field.setAccessible(true);
                 try {
                     ConfigEntity configEntity = configEntityMap.get(key);
-                    field.set(getObjectByKey(key), configEntity.getValue());
+                    Object keyLinkObj = getObjectByKey(key);
+                    if (keyLinkObj instanceof List) {
+                        for (Object obj : ((List<?>) keyLinkObj)) {
+                            field.set(obj, configEntity.getValue());
+                        }
+                    } else {
+                        field.set(keyLinkObj, configEntity.getValue());
+                    }
                     configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
@@ -257,14 +277,14 @@ public abstract class AbsSmartConfig implements SmartConfig {
      * @param field field
      * @return boolean
      */
-    abstract boolean isRegister(Field field);
+    protected abstract boolean isRegister(Field field);
 
 
-    abstract String getKey(Field field);
+    protected abstract String getKey(Field field);
 
-    abstract String propertyInject(Field field, String value);
+    protected abstract String propertyInject(Field field, String value);
 
-    abstract Class<? extends Annotation> getFieldAnnotation();
+    protected abstract Class<? extends Annotation> getFieldAnnotation();
 
     @Override
     public boolean containKey(String key) {
