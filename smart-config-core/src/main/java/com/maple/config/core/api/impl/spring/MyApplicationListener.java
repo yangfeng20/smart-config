@@ -14,18 +14,19 @@ public class MyApplicationListener implements ApplicationListener<ContextRefresh
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        System.out.println("开始初始化spring-smart-config");
-        SmartConfig smartConfig = new SpringBootConfig(true);
-        List<String> list = new ArrayList<>();
-        list.add("com.maple");
-        smartConfig.init(list, "application.properties");
-        ServerBootstrap serverBootstrap = new ServerBootstrap(smartConfig);
-        try {
-            serverBootstrap.start();
-        } catch (Exception e) {
-            System.out.println("初始化spring-smart-config失败");
-            throw new RuntimeException(e);
-        }
+        System.out.println(event);
+        //System.out.println("开始初始化spring-smart-config");
+        //SmartConfig smartConfig = new SpringBootConfig(true);
+        //List<String> list = new ArrayList<>();
+        //list.add("com.maple");
+        //smartConfig.init(list, "application.properties");
+        //ServerBootstrap serverBootstrap = new ServerBootstrap(smartConfig);
+        //try {
+        //    serverBootstrap.start();
+        //} catch (Exception e) {
+        //    System.out.println("初始化spring-smart-config失败");
+        //    throw new RuntimeException(e);
+        //}
     }
 
 }

@@ -2,11 +2,19 @@ package com.maple.config.core.api.impl.local;
 
 import com.maple.config.core.annotation.SmartValue;
 import com.maple.config.core.api.AbsSmartConfig;
+import com.maple.config.core.model.ConfigEntity;
+import com.maple.config.core.utils.ClassScanner;
+import com.maple.config.core.utils.TempConstant;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author yangfeng
@@ -49,31 +57,21 @@ public class LocalFileConfig extends AbsSmartConfig {
 
     @Override
     protected String propertyInject(Field field, String value) {
-        Annotation annotation = field.getAnnotation(getFieldAnnotation());
+        SmartValue annotation = field.getAnnotation(SmartValue.class);
         if (annotation == null) {
             return null;
         }
 
-        String annotationVal;
-        try {
-            annotationVal = (String) annotation.getClass().getDeclaredMethod("value").invoke(annotation);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        String annotationVal = annotation.value();
 
-        // 字段注解上没有默认值，取本地配置文件的value
         String newValue = value;
         String[] split = annotationVal.split(":");
-        if (split.length != 0) {
+        // 本地文件无值并且字段上有默认值
+        if (value == null && split.length == 2) {
             // 优先获取字段注解上的值
             newValue = split[1];
         }
 
-        // 默认值
         field.setAccessible(true);
         try {
             field.set(null, newValue);
@@ -92,7 +90,77 @@ public class LocalFileConfig extends AbsSmartConfig {
 
     @Override
     protected void customInit() {
+        List<String> packagePathList = TempConstant.packagePathList;
+        if (packagePathList == null || packagePathList.isEmpty()) {
+            throw new IllegalArgumentException("请指定包名路径");
+        }
 
+        List<Class<?>> scannerResult = new ArrayList<>();
+        for (String packagePath : packagePathList) {
+            try {
+                List<Class<?>> classes = ClassScanner.getClasses(packagePath);
+                scannerResult.addAll(classes);
+            } catch (ClassNotFoundException | IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
+        this.registerListener(scannerResult);
+        this.initDefaultValue();
+    }
+
+    public void initDefaultValue() {
+        for (Map.Entry<String, List<Field>> entry : configObserverMap.entrySet()) {
+            ConfigEntity configEntity = configEntityMap.get(entry.getKey());
+            // value = null时当前配置仅存在字段上，未在本地配置文件中配置
+            String localFileValue = null;
+            if (configEntity != null) {
+                localFileValue = configEntity.getValue();
+            }
+
+            // 本地文件和字段注解上都有这个key，优先取配置文件上的值【字段上只是默认值】
+            for (Field field : entry.getValue()) {
+                String newValue = propertyInject(field, localFileValue);
+                if (configEntity == null || configEntity.getValue().equals(newValue)) {
+                    continue;
+                }
+                // 更新配置值
+                configEntity.setValue(newValue);
+                configEntity.setUpdateDate(new Date());
+
+            }
+        }
+    }
+
+    /**
+     * 注册(变更)侦听器
+     * 扫描指定路径的类，并注册value变更监听器
+     * 会发生类加载行为
+     *
+     * @param classList 待注册字段观察者的类【也就是字段有注解修饰的类】
+     */
+    public void registerListener(List<Class<?>> classList) {
+        for (Class<?> clazz : classList) {
+            Field[] fields = clazz.getDeclaredFields();
+            for (Field field : fields) {
+                // 字段是否满足注册观察者条件
+                if (!isRegister(field)) {
+                    continue;
+                }
+
+                // 获取字段注解上的key
+                String configKey = getKey(field);
+                if (configKey == null) {
+                    continue;
+                }
+
+                // 当前配置key关联的所有观察者
+                List<Field> keyLinkFieldList = configObserverMap.getOrDefault(configKey, new ArrayList<>());
+                keyLinkFieldList.add(field);
+                configObserverMap.put(configKey, keyLinkFieldList);
+            }
+        }
     }
 
     @Override

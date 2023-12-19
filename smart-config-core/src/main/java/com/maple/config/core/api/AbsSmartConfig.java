@@ -3,6 +3,7 @@ package com.maple.config.core.api;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.model.ReleaseStatusEnum;
 import com.maple.config.core.utils.ClassScanner;
+import com.maple.config.core.utils.TempConstant;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -11,6 +12,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -42,41 +44,32 @@ public abstract class AbsSmartConfig implements SmartConfig {
 
     @Override
     public void init(List<String> packagePathList, String localConfigPath) {
-        if (packagePathList == null || packagePathList.isEmpty()) {
-            throw new IllegalArgumentException("请指定包名路径");
-        }
-
-        List<Class<?>> scannerResult = new ArrayList<>();
-        for (String packagePath : packagePathList) {
-            try {
-                List<Class<?>> classes = ClassScanner.getClasses(packagePath);
-                scannerResult.addAll(classes);
-            } catch (ClassNotFoundException | IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
+        TempConstant.packagePathList = packagePathList;
+        TempConstant.localConfigPath = localConfigPath;
+        // 加载本地配置文件
         this.loadLocalFileConfig(localConfigPath);
-        this.registerListener(scannerResult);
 
+        // 子类自定义初始化操作
         customInit();
-
-        this.initDefaultValue();
     }
 
+    /**
+     * 自定义初始化
+     */
     protected abstract void customInit();
 
     public void loadLocalFileConfig(String localConfigPath) {
         List<String> lineDataList;
         try {
-            // todo 路径适配问题
             URL resource = this.getClass().getResource("/");
             if (resource == null) {
                 throw new RuntimeException("获取路径url为空");
             }
-            String basePath = URLDecoder.decode(resource.getPath(), "utf-8").substring(1);
-            lineDataList = Files.readAllLines(Paths.get(basePath + localConfigPath), Charset.defaultCharset());
-        } catch (IOException e) {
+            Path basePath = Paths.get(resource.toURI());
+            Path filePath = basePath.resolve(localConfigPath);
+            lineDataList = Files.readAllLines(filePath, Charset.defaultCharset());
+
+        } catch (Exception e) {
             throw new RuntimeException("加载本地配置文件失败", e);
         }
 
@@ -112,52 +105,6 @@ public abstract class AbsSmartConfig implements SmartConfig {
         }
         configEntityMap = configEntityList.stream()
                 .collect(Collectors.toMap(ConfigEntity::getKey, Function.identity()));
-    }
-
-
-    @Override
-    public void registerListener(List<Class<?>> classList) {
-        for (Class<?> clazz : classList) {
-            Field[] fields = clazz.getDeclaredFields();
-            for (Field field : fields) {
-                if (!isRegister(field)) {
-                    continue;
-                }
-
-                String configKey = getKey(field);
-                if (configKey == null) {
-                    continue;
-                }
-
-                List<Field> keyLinkFieldList = configObserverMap.getOrDefault(configKey, new ArrayList<>());
-                keyLinkFieldList.add(field);
-                configObserverMap.put(configKey, keyLinkFieldList);
-            }
-        }
-    }
-
-    @Override
-    public void initDefaultValue() {
-        for (Map.Entry<String, List<Field>> entry : configObserverMap.entrySet()) {
-            ConfigEntity configEntity = configEntityMap.get(entry.getKey());
-            // value = null时当前配置仅存在字段上，未在本地配置文件中配置
-            String localFileValue = null;
-            if (configEntity != null) {
-                localFileValue = configEntity.getValue();
-            }
-
-            // 本地文件和字段注解上都有这个key，优先取字段注解上的值
-            for (Field field : entry.getValue()) {
-                String newValue = propertyInject(field, localFileValue);
-                if (configEntity == null || configEntity.getValue().equals(newValue)) {
-                    continue;
-                }
-                // 更新配置值
-                configEntity.setValue(newValue);
-                configEntity.setUpdateDate(new Date());
-
-            }
-        }
     }
 
 
