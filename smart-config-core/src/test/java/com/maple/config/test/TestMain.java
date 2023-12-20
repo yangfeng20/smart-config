@@ -1,10 +1,9 @@
 package com.maple.config.test;
 
-import com.maple.config.core.api.impl.local.LocalFileConfig;
 import com.maple.config.core.api.SmartConfig;
-import com.maple.config.core.web.ServerBootstrap;
+import com.maple.config.core.api.impl.local.LocalFileConfig;
 
-import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * @author yangfeng
@@ -14,25 +13,15 @@ import java.util.ArrayList;
 
 public class TestMain {
     public static void main(String[] args) throws Exception {
-        final SmartConfig smartConfig = new LocalFileConfig(true);
-        ArrayList<String> list = new ArrayList<>();
-        list.add("com.maple.config.test");
-        smartConfig.init(list, "application.properties");
+        final SmartConfig smartConfig = new LocalFileConfig(6767, true);
+        smartConfig.init(Collections.singletonList("com.maple.config.test"), "application.properties");
 
         TestService service = new TestService();
-        service.test01();
 
-        // 修改后未发布
-        smartConfig.changeConfig("aaa", "222");
-        //smartConfig.release(null);
-        service.test01();
+        for (int i = 0; i < 1000; i++) {
+            service.test01();
+            Thread.sleep(10000);
+        }
 
-        new Thread(() -> {
-            try {
-                new ServerBootstrap(smartConfig).start();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }).start();
     }
 }

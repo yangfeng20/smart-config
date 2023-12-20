@@ -19,6 +19,9 @@ public class TestService {
     private static String val2;
 
     public void test01(){
-        System.out.println(val);
+        System.out.println("val = " + val);
+        System.out.println("val1 = " + val1);
+        System.out.println("val2 = " + val2);
+        System.out.println("-------------------------");
     }
 }

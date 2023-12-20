@@ -20,7 +20,25 @@ import java.lang.annotation.Target;
 @Import({SpringContext.class, SpringBeanKeyRegister.class, SmartConfigRunner.class})
 public @interface EnableSmartConfig {
 
+    /**
+     * 本地配置文件名；默认从编译之后的根路径下 target/classes
+     *
+     * @return 文件路径
+     */
     String localFilePath() default "application.properties";
 
+    /**
+     * 配置描述推断
+     * 自动根据本地配置文件上的中文注解推断描述
+     *
+     * @return 是否开启
+     */
     boolean descInfer() default false;
+
+    /**
+     * webUi端口
+     *
+     * @return 端口
+     */
+    int webUiPort() default 6767;
 }

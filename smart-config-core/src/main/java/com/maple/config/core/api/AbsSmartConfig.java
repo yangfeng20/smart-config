@@ -2,14 +2,10 @@ package com.maple.config.core.api;
 
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.model.ReleaseStatusEnum;
-import com.maple.config.core.utils.ClassScanner;
 import com.maple.config.core.utils.TempConstant;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -228,8 +224,6 @@ public abstract class AbsSmartConfig implements SmartConfig {
     protected abstract String getKey(Field field);
 
     protected abstract String propertyInject(Field field, String value);
-
-    protected abstract Class<? extends Annotation> getFieldAnnotation();
 
     @Override
     public boolean containKey(String key) {

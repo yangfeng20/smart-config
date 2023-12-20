@@ -3,7 +3,6 @@ package com.maple.config.core.api.impl.spring;
 import com.maple.config.core.api.AbsSmartConfig;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
@@ -21,10 +20,6 @@ public class SpringBootConfig extends AbsSmartConfig {
 
 
     protected Map<String, List<String>> beanKeyNameMap;
-
-    public void setBeanKeyNameMap(Map<String, List<String>> beanKeyNameMap) {
-        this.beanKeyNameMap = beanKeyNameMap;
-    }
 
     public SpringBootConfig(boolean descInfer) {
         super(descInfer);
@@ -76,11 +71,6 @@ public class SpringBootConfig extends AbsSmartConfig {
         }
 
         return value;
-    }
-
-    @Override
-    protected Class<? extends Annotation> getFieldAnnotation() {
-        return Value.class;
     }
 
     private List<Object> getBeanByKey(String key) {

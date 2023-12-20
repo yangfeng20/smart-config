@@ -4,6 +4,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import java.lang.annotation.Annotation;
+import java.util.Map;
+
 /**
  * @author maple
  * Created Date: 2023/12/17 13:43
@@ -40,6 +43,10 @@ public class SpringContext implements ApplicationContextAware {
      */
     public static <T> T getBean(Class<T> clazz) {
         return applicationContext.getBean(clazz);
+    }
+
+    public static Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotation){
+        return applicationContext.getBeansWithAnnotation(annotation);
     }
 
 }

@@ -5,11 +5,10 @@ import com.maple.config.core.api.AbsSmartConfig;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.utils.ClassScanner;
 import com.maple.config.core.utils.TempConstant;
+import com.maple.config.core.web.ServerBootstrap;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,11 +17,18 @@ import java.util.Map;
 
 /**
  * @author yangfeng
- * @date : 2023/12/1 17:16
+ * @since : 2023/12/1 17:16
  * desc:
  */
 
 public class LocalFileConfig extends AbsSmartConfig {
+
+    private int webUiPort;
+
+    public LocalFileConfig(int webUiPort, boolean descInfer) {
+        super(descInfer);
+        this.webUiPort = webUiPort;
+    }
     public LocalFileConfig(boolean descInfer) {
         super(descInfer);
     }
@@ -83,12 +89,6 @@ public class LocalFileConfig extends AbsSmartConfig {
     }
 
     @Override
-    protected Class<? extends Annotation> getFieldAnnotation() {
-        return SmartValue.class;
-    }
-
-
-    @Override
     protected void customInit() {
         List<String> packagePathList = TempConstant.packagePathList;
         if (packagePathList == null || packagePathList.isEmpty()) {
@@ -108,6 +108,20 @@ public class LocalFileConfig extends AbsSmartConfig {
 
         this.registerListener(scannerResult);
         this.initDefaultValue();
+        this.startWebUi();
+    }
+
+    private void startWebUi() {
+        if (webUiPort == 0){
+            webUiPort = 6767;
+        }
+        new Thread(() -> {
+            try {
+                new ServerBootstrap(this).start(webUiPort);
+            } catch (Exception e) {
+                throw new RuntimeException("Smart-config:启动webUi失败", e);
+            }
+        }).start();
     }
 
     public void initDefaultValue() {

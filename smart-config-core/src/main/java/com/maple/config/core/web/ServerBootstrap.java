@@ -52,14 +52,14 @@ public class ServerBootstrap {
     }
 
     public void start() throws Exception {
-        // todo 端口配置
-        Server server = new Server(6767);
+        start(6767);
+    }
+
+    public void start(int port) throws Exception {
+        Server server = new Server(port);
         webAppContext = new WebAppContext();
         URL webappResourceRootPath = getParentURL(ServerBootstrap.class.getClassLoader().getResource("list.jsp"));
         webAppContext.setBaseResource(Resource.newResource(webappResourceRootPath));
-        System.out.println("当前路径--------------------");
-        System.out.println(webappResourceRootPath);
-        System.out.println("当前路径--------------------");
         webAppContext.setDisplayName("smart-config");
         webAppContext.setClassLoader(Thread.currentThread().getContextClassLoader());
         webAppContext.setConfigurationDiscovered(true);
