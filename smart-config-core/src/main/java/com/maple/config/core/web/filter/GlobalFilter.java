@@ -1,31 +1,53 @@
 package com.maple.config.core.web.filter;
 
+import com.maple.config.core.exp.SmartConfigApplicationException;
+
 import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.List;
 
 public class GlobalFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) {
-        // 过滤器初始化时调用
-        System.out.println("过滤器初始化");
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-        // 在请求处理之前执行一些操作
-        System.out.println("GlobalFilter: 进入过滤器");
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException {
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse resp = (HttpServletResponse) response;
 
-        // 继续执行其他过滤器链或者目标servlet
-        chain.doFilter(request, response);
 
-        // 在响应返回给客户端之前执行一些操作
-        System.out.println("GlobalFilter: 退出过滤器");
+
+        try {
+            chain.doFilter(request, response);
+        } catch (Exception e) {
+            exceptionHandler(req, resp, e);
+        }
+
     }
 
     @Override
     public void destroy() {
-        // 过滤器销毁时调用
-        System.out.println("过滤器销毁");
+    }
+
+
+
+    private void exceptionHandler(HttpServletRequest req, HttpServletResponse resp, Exception e) throws IOException {
+        resp.setContentType("text/plain;charset=UTF-8");
+        if (e instanceof SmartConfigApplicationException) {
+            resp.setStatus(500);
+            PrintWriter writer = resp.getWriter();
+            writer.write(e.getMessage());
+            writer.flush();
+            writer.close();
+            return;
+        }
+
+        throw new RuntimeException(e);
     }
 }

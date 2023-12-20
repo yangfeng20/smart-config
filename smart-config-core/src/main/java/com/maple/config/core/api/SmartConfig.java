@@ -4,6 +4,7 @@ import com.maple.config.core.model.ConfigEntity;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author yangfeng
@@ -78,5 +79,11 @@ public interface SmartConfig {
      * @param keyList key列表 仅发布指定的key
      */
     void release(Collection<String> keyList);
+
+    /**
+     * 扩展信息Map
+     * @return map
+     */
+    Map<String, Object> getExtMap();
 
 }

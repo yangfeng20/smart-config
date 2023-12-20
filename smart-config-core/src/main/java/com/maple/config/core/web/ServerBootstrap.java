@@ -2,13 +2,12 @@ package com.maple.config.core.web;
 
 
 import com.maple.config.core.api.SmartConfig;
+import com.maple.config.core.web.filter.AuthFilter;
 import com.maple.config.core.web.filter.GlobalFilter;
 import com.maple.config.core.web.servlet.EditConfigServlet;
-import com.maple.config.core.web.servlet.HelloServlet;
 import com.maple.config.core.web.servlet.ListConfigServlet;
+import com.maple.config.core.web.servlet.LoginServlet;
 import com.maple.config.core.web.servlet.ReleaseConfigServlet;
-import org.apache.tomcat.util.descriptor.web.JspPropertyGroup;
-import org.apache.tomcat.util.descriptor.web.JspPropertyGroupDescriptorImpl;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
 import org.eclipse.jetty.jsp.JettyJspServlet;
@@ -19,23 +18,15 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
-import org.springframework.core.io.InputStreamResource;
 
 import javax.servlet.DispatcherType;
-import javax.servlet.descriptor.JspConfigDescriptor;
-import javax.servlet.descriptor.JspPropertyGroupDescriptor;
-import javax.servlet.descriptor.TaglibDescriptor;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumSet;
 
 /**
  * @author yangfeng
- * @date : 2023/12/4 16:11
+ * @since : 2023/12/4 16:11
  * desc:
  */
 public class ServerBootstrap {
@@ -69,10 +60,10 @@ public class ServerBootstrap {
         webAppContext.addBean(new JspStarter(webAppContext));
         webAppContext.addServlet(JettyJspServlet.class, "*.jsp");
 
-
         // 添加一个全局过滤器
         FilterHolder filterHolder = new FilterHolder(new GlobalFilter());
         webAppContext.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
+        webAppContext.addFilter(new FilterHolder(new AuthFilter()), "/*", EnumSet.of(DispatcherType.REQUEST));
 
         server.setHandler(webAppContext);
 
@@ -88,7 +79,7 @@ public class ServerBootstrap {
     }
 
     private static URL getParentURL(URL originalURL) {
-        if (originalURL == null){
+        if (originalURL == null) {
             return null;
         }
         String urlString = originalURL.toString();
@@ -105,6 +96,7 @@ public class ServerBootstrap {
     }
 
     public void addServlet() {
+        webAppContext.addServlet(new ServletHolder(new LoginServlet(this.smartConfig)), "/login");
         webAppContext.addServlet(new ServletHolder(new ListConfigServlet(this.smartConfig)), "/list");
         webAppContext.addServlet(new ServletHolder(new EditConfigServlet(this.smartConfig)), "/edit");
         webAppContext.addServlet(new ServletHolder(new ReleaseConfigServlet(this.smartConfig)), "/release");

@@ -1,5 +1,6 @@
 package com.maple.config.core.api;
 
+import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.model.ReleaseStatusEnum;
 import com.maple.config.core.utils.TempConstant;
@@ -31,6 +32,8 @@ public abstract class AbsSmartConfig implements SmartConfig {
 
     // 配置描述推断
     private final boolean descInfer;
+
+    private final Map<String, Object> extMap = new HashMap<>();
 
     public AbsSmartConfig(boolean descInfer) {
         this.descInfer = descInfer;
@@ -91,6 +94,8 @@ public abstract class AbsSmartConfig implements SmartConfig {
                 value = strArr[1].trim();
             }
 
+            buildAuthInfo(key, value);
+
             ConfigEntity configEntity = new ConfigEntity(key, value, ReleaseStatusEnum.RELEASE.getCode());
             configEntity.setDesc(desc);
             configEntity.setCreateDate(createDate);
@@ -99,6 +104,24 @@ public abstract class AbsSmartConfig implements SmartConfig {
         }
         configEntityMap = configEntityList.stream()
                 .collect(Collectors.toMap(ConfigEntity::getKey, Function.identity()));
+        checkAuthInfo();
+    }
+
+    private void checkAuthInfo() {
+        if (getExtMap().containsKey("username") && getExtMap().containsKey("password")) {
+            return;
+        }
+
+        throw new SmartConfigApplicationException("未在配置文件中配置webUi用户名和密码;[smart.username=xxx;smart.password=xxx;]");
+    }
+
+    private void buildAuthInfo(String key, String value) {
+        if ("smart.username".equals(key)) {
+            getExtMap().put("username", value);
+        }
+        if ("smart.password".equals(key)) {
+            getExtMap().put("password", value);
+        }
     }
 
 
@@ -180,7 +203,7 @@ public abstract class AbsSmartConfig implements SmartConfig {
     @Override
     public void addConfig(String key, String value) {
         if (this.containKey(key)) {
-            throw new RuntimeException("配置key已存在，无法添加");
+            throw new SmartConfigApplicationException("配置key已存在，无法添加");
         }
 
         ConfigEntity configEntity = new ConfigEntity(key, value, ReleaseStatusEnum.NOT_RELEASE.getCode());
@@ -211,6 +234,10 @@ public abstract class AbsSmartConfig implements SmartConfig {
         configEntityMap.put(key, instantConfigEntity);
     }
 
+    @Override
+    public Map<String, Object> getExtMap() {
+        return extMap;
+    }
 
     /**
      * 当前字段是否注册观察者
