@@ -30,12 +30,12 @@ public class SpringbootApplication {
     public static void main(String[] args) throws Exception {
         ConfigurableApplicationContext application = SpringApplication.run(SpringbootApplication.class, args);
 
-        SmartConfig smartConfig = new SpringBootConfig(true);
-        List<String> list = new ArrayList<>();
-        list.add("com.maple");
-        smartConfig.init(list,"application.properties");
-        ServerBootstrap serverBootstrap = new ServerBootstrap(smartConfig);
-        serverBootstrap.start();
+        //SmartConfig smartConfig = new SpringBootConfig(true);
+        //List<String> list = new ArrayList<>();
+        //list.add("com.maple");
+        //smartConfig.init(list,"application.properties");
+        //ServerBootstrap serverBootstrap = new ServerBootstrap(smartConfig);
+        //serverBootstrap.start();
     }
 
     @RequestMapping("/test01")

@@ -33,8 +33,6 @@ public abstract class AbsSmartConfig implements SmartConfig {
 
     protected Collection<String> waitReleaseConfigKeyList = new CopyOnWriteArrayList<>();
 
-    protected Map<String, List<String>> beanKeyNameMap;
-
     // 配置描述推断
     private final boolean descInfer;
 

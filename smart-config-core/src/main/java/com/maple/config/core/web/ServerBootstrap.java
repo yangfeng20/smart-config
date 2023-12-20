@@ -17,12 +17,18 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.component.AbstractLifeCycle;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.springframework.core.io.InputStreamResource;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.descriptor.TaglibDescriptor;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -46,10 +52,14 @@ public class ServerBootstrap {
     }
 
     public void start() throws Exception {
-        Server server = new Server(8080);
+        // todo 端口配置
+        Server server = new Server(6767);
         webAppContext = new WebAppContext();
-        // todo 地址动态获取，当前项目地址，以及jsp文件拷贝
-        webAppContext.setResourceBase("./smart-config-core/src/main/web");
+        URL webappResourceRootPath = getParentURL(ServerBootstrap.class.getClassLoader().getResource("list.jsp"));
+        webAppContext.setBaseResource(Resource.newResource(webappResourceRootPath));
+        System.out.println("当前路径--------------------");
+        System.out.println(webappResourceRootPath);
+        System.out.println("当前路径--------------------");
         webAppContext.setDisplayName("smart-config");
         webAppContext.setClassLoader(Thread.currentThread().getContextClassLoader());
         webAppContext.setConfigurationDiscovered(true);
@@ -75,6 +85,23 @@ public class ServerBootstrap {
         // 启动服务器
         server.start();
         server.join();
+    }
+
+    private static URL getParentURL(URL originalURL) {
+        if (originalURL == null){
+            return null;
+        }
+        String urlString = originalURL.toString();
+        int lastIndex = urlString.lastIndexOf('/');
+        if (lastIndex != -1) {
+            String parentURLString = urlString.substring(0, lastIndex + 1);
+            try {
+                return new URL(parentURLString);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     public void addServlet() {

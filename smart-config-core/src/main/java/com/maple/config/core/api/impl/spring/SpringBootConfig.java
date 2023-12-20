@@ -7,31 +7,34 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 /**
  * @author yangfeng
- * @date : 2023/12/1 17:17
+ * @since : 2023/12/1 17:17
  * desc:
  */
 
 public class SpringBootConfig extends AbsSmartConfig {
 
 
-    public SpringBootConfig(boolean descInfer) {
-        super(descInfer);
+    protected Map<String, List<String>> beanKeyNameMap;
+
+    public void setBeanKeyNameMap(Map<String, List<String>> beanKeyNameMap) {
+        this.beanKeyNameMap = beanKeyNameMap;
     }
 
-    @Override
-    public void init(List<String> packagePathList, String localConfigPath) {
-        super.init(packagePathList, localConfigPath);
+    public SpringBootConfig(boolean descInfer) {
+        super(descInfer);
     }
 
     @Override
     protected void customInit() {
         SpringBeanKeyRegister springBeanKeyRegister = SpringContext.getBean(SpringBeanKeyRegister.class);
         beanKeyNameMap = springBeanKeyRegister.getBeanKeyMap();
+        configObserverMap = springBeanKeyRegister.getConfigObserverMap();
     }
 
     @Override
