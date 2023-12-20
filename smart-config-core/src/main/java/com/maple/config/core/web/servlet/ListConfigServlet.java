@@ -47,7 +47,7 @@ public class ListConfigServlet extends HttpServlet {
         // 将configList添加到request的属性中
         req.setAttribute("configList", configList);
         // 转发请求到JSP页面
-        req.getRequestDispatcher("/list.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/list.jsp").forward(req, resp);
     }
 
     @Override

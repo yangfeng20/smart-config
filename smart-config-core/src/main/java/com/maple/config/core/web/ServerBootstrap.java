@@ -58,7 +58,7 @@ public class ServerBootstrap {
     public void start(int port) throws Exception {
         Server server = new Server(port);
         webAppContext = new WebAppContext();
-        URL webappResourceRootPath = getParentURL(ServerBootstrap.class.getClassLoader().getResource("list.jsp"));
+        URL webappResourceRootPath = getParentURL(ServerBootstrap.class.getClassLoader().getResource("index.html"));
         webAppContext.setBaseResource(Resource.newResource(webappResourceRootPath));
         webAppContext.setDisplayName("smart-config");
         webAppContext.setClassLoader(Thread.currentThread().getContextClassLoader());
