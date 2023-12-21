@@ -79,8 +79,13 @@ public abstract class AbsSmartConfig implements SmartConfig {
                 desc = lineStr.substring(1).trim();
                 continue;
             }
+            // 过滤注释的配置
+            if (!descInfer && lineStr.startsWith("#")){
+                continue;
+            }
             // 过滤空行和文件不规范的数据
             if (!lineStr.contains("=")) {
+                desc = "";
                 continue;
             }
 
