@@ -10,7 +10,15 @@
 
 <h1>Welcome to Smart-Config</h1>
 
-<h4><a href="/list">查看配置列表</a></h4>
+<h4><a href="/list" onclick="addTimestamp()">查看配置列表</a></h4>
 
 </body>
 </html>
+
+<script>
+    function addTimestamp() {
+        var link = document.querySelector('a[href="/list"]');
+        var timestamp = new Date().getTime();
+        link.href = "/list?t=" + timestamp;
+    }
+</script>

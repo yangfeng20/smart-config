@@ -33,7 +33,9 @@ public class AuthFilter implements Filter {
         HttpServletResponse resp = (HttpServletResponse) response;
 
         if (!notAuthUrl.contains(req.getRequestURI())) {
-            authHandler(req, resp);
+            if(authHandler(req, resp)){
+                return;
+            }
         }
 
         filterChain.doFilter(request, response);
@@ -44,10 +46,13 @@ public class AuthFilter implements Filter {
 
     }
 
-    private void authHandler(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+    private boolean authHandler(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         HttpSession session = req.getSession(false);
         if (session == null) {
             req.getRequestDispatcher("/login.html").forward(req, resp);
+            return true;
         }
+
+        return false;
     }
 }

@@ -134,7 +134,9 @@
         })
             .then(response => {
                 if (response.ok) {
-                    window.location.href = '/'
+                    // 生成当前时间戳
+                    let timestamp = new Date().getTime()
+                    window.location.href = '/?t=' + timestamp;
                 } else {
                     response.text().then(text => errorMessage(text))
                 }

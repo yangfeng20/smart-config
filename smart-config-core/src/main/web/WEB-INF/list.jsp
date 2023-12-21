@@ -2,7 +2,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%
 	String path = request.getContextPath();
-	String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + path + "/";
 %>
 <html>
 <head>
@@ -231,6 +231,7 @@
                         location.reload()
                     }, 2000)
                 } else {
+                    document.getElementById('value').value = ''
                     const successMessage = document.getElementById('successMessage');
                     response.text().then(result => {
                         successMessage.style.background = 'red'
