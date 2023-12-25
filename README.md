@@ -23,6 +23,18 @@
 
 
 ### 使用
+
+#### 依赖引入
+
+```xml
+<dependency>
+  <groupId>com.maple.smart.config.core</groupId>
+  <artifactId>smart-config-core</artifactId>
+  <version>1.0-SNAPSHOT</version>
+</dependency>
+```
+
+
 1. Spring-Boot使用
 
     主类添加注解`@EnableSmartConfig`

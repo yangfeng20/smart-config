@@ -59,6 +59,15 @@
 
     </dependencies>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub OWNER Apache Maven Packages</name>
+            <!--OWNER替换为 github的用户名或你所属组织的名称；REPOSITORY替换为项目名称-->
+            <url>https://maven.pkg.github.com/yangfeng20/smart-config</url>
+        </repository>
+    </distributionManagement>
+
 
     <build>
         <resources>
