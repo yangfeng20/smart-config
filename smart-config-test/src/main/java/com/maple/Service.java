@@ -2,6 +2,8 @@ package com.maple;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.List;
+
 /**
  * @author maple
  * Created Date: 2023/12/18 15:08
@@ -19,6 +21,9 @@ public class Service {
 
     @Value("${ccc:ddd}")
     private String val3;
+
+    @Value("list:[1,2,3]")
+    public List<Integer> list;
 
 
     public void test01() {

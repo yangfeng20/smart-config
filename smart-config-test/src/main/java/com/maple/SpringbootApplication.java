@@ -24,6 +24,8 @@ public class SpringbootApplication {
 
     public static void main(String[] args) throws Exception {
         ConfigurableApplicationContext application = SpringApplication.run(SpringbootApplication.class, args);
+
+        System.out.println(application.getBean(Service.class).list);
     }
 
     @RequestMapping("/test01")

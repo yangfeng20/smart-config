@@ -1,6 +1,8 @@
 package com.maple.config.core.api.impl.spring;
 
-import com.maple.config.core.api.AbsSmartConfig;
+import com.maple.config.core.annotation.SmartValue;
+import com.maple.config.core.api.SmartConfig;
+import com.maple.config.core.api.impl.local.LocalFileConfig;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.lang.reflect.Field;
@@ -16,7 +18,7 @@ import java.util.stream.Collectors;
  * desc:
  */
 
-public class SpringBootConfig extends AbsSmartConfig {
+public class SpringBootConfig extends LocalFileConfig {
 
 
     protected Map<String, List<String>> beanKeyNameMap;
@@ -27,24 +29,15 @@ public class SpringBootConfig extends AbsSmartConfig {
 
     @Override
     protected void customInit() {
+        super.customInit();
         SpringBeanKeyRegister springBeanKeyRegister = SpringContext.getBean(SpringBeanKeyRegister.class);
         beanKeyNameMap = springBeanKeyRegister.getBeanKeyMap();
         configObserverMap = springBeanKeyRegister.getConfigObserverMap();
     }
 
     @Override
-    protected boolean isRegister(Field field) {
-        Value annotation = field.getAnnotation(Value.class);
-        if (annotation == null) {
-            return false;
-        }
-        String value = annotation.value();
-        return !value.isEmpty();
-    }
-
-    @Override
     protected String getKey(Field field) {
-        Value annotation = field.getAnnotation(Value.class);
+        SmartValue annotation = field.getAnnotation(SmartValue.class);
         if (annotation == null) {
             return null;
         }
