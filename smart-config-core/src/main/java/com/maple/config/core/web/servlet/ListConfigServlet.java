@@ -19,13 +19,7 @@ import java.util.stream.Collectors;
  * @date : 2023/12/4 16:22
  * desc:
  */
-public class ListConfigServlet extends HttpServlet {
-
-    private final SmartConfig smartConfig;
-
-    public ListConfigServlet(SmartConfig smartConfig) {
-        this.smartConfig = smartConfig;
-    }
+public class ListConfigServlet extends AbsConfigHttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -40,7 +34,7 @@ public class ListConfigServlet extends HttpServlet {
     }
 
     private void handler(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        List<ConfigVO> configList = smartConfig.configList()
+        List<ConfigVO> configList = configRepository.configList()
                 .stream().map(ConfigVO::build)
                 .collect(Collectors.toList());
 

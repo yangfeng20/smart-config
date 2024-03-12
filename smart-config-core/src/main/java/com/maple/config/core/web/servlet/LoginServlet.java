@@ -3,7 +3,9 @@ package com.maple.config.core.web.servlet;
 import com.maple.config.core.api.SmartConfig;
 import com.maple.config.core.exp.SmartConfigApplicationException;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,21 +20,14 @@ import java.util.Objects;
  * Description:
  */
 
-public class LoginServlet extends HttpServlet {
 
-    private final SmartConfig smartConfig;
-
-    public LoginServlet(SmartConfig smartConfig) {
-        this.smartConfig = smartConfig;
-    }
-
+public class LoginServlet extends AbsConfigHttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        Map<String, Object> extMap = smartConfig.getExtMap();
-        Object username = extMap.get("username");
-        Object pwd = extMap.get("password");
+        Object username = configRepository.getConfig("username");
+        Object pwd = configRepository.getConfig("password");
 
         String usernameParam = req.getParameter("username");
         String pwdParam = req.getParameter("password");

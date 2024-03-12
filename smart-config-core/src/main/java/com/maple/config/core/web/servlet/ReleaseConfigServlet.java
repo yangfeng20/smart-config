@@ -14,16 +14,11 @@ import java.io.IOException;
  * desc:
  */
 
-public class ReleaseConfigServlet extends HttpServlet {
+public class ReleaseConfigServlet extends AbsConfigHttpServlet {
 
-    private final SmartConfig smartConfig;
-
-    public ReleaseConfigServlet(SmartConfig smartConfig) {
-        this.smartConfig = smartConfig;
-    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        smartConfig.release(null);
+        configRepository.release();
     }
 }
