@@ -81,7 +81,7 @@ public class LocalConfigBootstrap {
             throw new SmartConfigApplicationException("未提供配置加载器【ConfigLoader】");
         }
         ConfigLoader configLoader = loaderIterator.next();
-        configRepository.loader(configLoader.loaderConfig());
+        configRepository.loader(configLoader.loaderConfig(""));
     }
 
 

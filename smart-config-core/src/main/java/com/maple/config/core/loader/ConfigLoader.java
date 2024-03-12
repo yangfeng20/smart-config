@@ -12,5 +12,5 @@ import java.util.Collection;
 
 public interface ConfigLoader {
 
-    Collection<ConfigEntity> loaderConfig();
+    Collection<ConfigEntity> loaderConfig(String path);
 }
