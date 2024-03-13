@@ -3,18 +3,19 @@ package com.maple.config.core.boot;
 import com.maple.config.core.control.WebOperationControlPanel;
 import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.listener.AutoUpdateConfigListener;
+import com.maple.config.core.listener.ConfigListener;
 import com.maple.config.core.loader.ConfigLoader;
+import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.repository.ConfigRepository;
 import com.maple.config.core.subscription.ConfigSubscription;
 import com.maple.config.core.subscription.LocalConfigSubscription;
 import com.maple.config.core.utils.ClassScanner;
+import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 
 /**
  * @author maple
@@ -47,11 +48,14 @@ public class LocalConfigBootstrap {
 
     private ConfigRepository configRepository;
 
+    private final List<ConfigLoader> configLoaderList = new ArrayList<>();
+
     private ConfigSubscription configSubscription = new LocalConfigSubscription();
 
     public void init() {
 
         // todo spi 动态加载实现类
+        loaderSpiImpl();
 
         loaderConfig();
 
@@ -66,26 +70,48 @@ public class LocalConfigBootstrap {
 
         // todo 字段赋值 订阅者添加到配置仓库，配置参数发布，通知订阅者
         configSubscription.refresh();
+    }
 
-        // 自动更新 todo spi动态添加
-        configSubscription.addListener(new AutoUpdateConfigListener());
+    private void loaderSpiImpl() {
 
+        // 配置加载器
+        List<ConfigLoader> sipImplConfigLoaderList = SpringFactoriesLoader.loadFactories(ConfigLoader.class, LocalConfigBootstrap.class.getClassLoader());
+        configLoaderList.addAll(sipImplConfigLoaderList);
+        if (CollectionUtils.isEmpty(configLoaderList)) {
+            ServiceLoader.load(ConfigLoader.class).forEach(configLoaderList::add);
+        }
 
+        // 配置仓库
+        configRepository = SpringFactoriesLoader.loadFactories(ConfigRepository.class, LocalConfigBootstrap.class.getClassLoader()).get(0);
+        if (configRepository == null) {
+            ServiceLoader.load(ConfigRepository.class).forEach(configRepository -> {
+                this.configRepository = configRepository;
+            });
+        }
+
+        // 配置订阅者
+        configSubscription = SpringFactoriesLoader.loadFactories(ConfigSubscription.class, LocalConfigBootstrap.class.getClassLoader()).get(0);
+        if (configSubscription == null) {
+            ServiceLoader.load(ConfigSubscription.class).forEach(configSubscription -> {
+                this.configSubscription = configSubscription;
+            });
+        }
+
+        // 配置监听者
+        SpringFactoriesLoader.loadFactories(ConfigListener.class, LocalConfigBootstrap.class.getClassLoader())
+                .forEach(configListener -> configSubscription.addListener(configListener));
+        ServiceLoader.load(ConfigListener.class).forEach(configListener -> configSubscription.addListener(configListener));
     }
 
     private void loaderConfig() {
-        // 加载配置
-        ServiceLoader<ConfigLoader> configLoaders = ServiceLoader.load(ConfigLoader.class);
-        Iterator<ConfigLoader> loaderIterator = configLoaders.iterator();
-        if (!loaderIterator.hasNext()) {
-            throw new SmartConfigApplicationException("未提供配置加载器【ConfigLoader】");
+        for (ConfigLoader configLoader : configLoaderList) {
+            Collection<ConfigEntity> configEntityList = configLoader.loaderConfig(localConfigPath);
+            configRepository.loader(configEntityList);
         }
-        ConfigLoader configLoader = loaderIterator.next();
-        configRepository.loader(configLoader.loaderConfig(""));
     }
 
 
-    List<Class<?>> scanClass() {
+    private List<Class<?>> scanClass() {
         if (packagePathList == null || packagePathList.isEmpty()) {
             throw new IllegalArgumentException("请指定包名路径");
         }

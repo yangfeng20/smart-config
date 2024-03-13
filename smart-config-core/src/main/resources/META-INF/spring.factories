@@ -1,1 +1,4 @@
 com.maple.config.core.loader.ConfigLoader=com.maple.config.core.loader.StringLineLoader
+com.maple.config.core.repository.ConfigRepository=com.maple.config.core.repository.DefaultConfigRepository
+com.maple.config.core.subscription.ConfigSubscription=com.maple.config.core.subscription.LocalConfigSubscription
+com.maple.config.core.listener.ConfigListener=com.maple.config.core.listener.AutoUpdateConfigListener
