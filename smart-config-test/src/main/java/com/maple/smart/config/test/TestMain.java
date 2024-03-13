@@ -1,5 +1,6 @@
-package com.maple;
+package com.maple.smart.config.test;
 
+import com.maple.config.core.boot.AbsConfigBootstrap;
 import com.maple.config.core.boot.LocalConfigBootstrap;
 
 import java.util.ArrayList;
@@ -14,12 +15,10 @@ import java.util.List;
 public class TestMain {
     public static void main(String[] args) throws Exception {
 
-        LocalConfigBootstrap bootstrap = new LocalConfigBootstrap();
-        bootstrap.setDescInfer(true);
         List<String> list = new ArrayList<>();
-        list.add("com.maple.config.test.TestMain");
-        bootstrap.setPackagePathList(list);
-        bootstrap.setLocalConfigPath("application.properties");
+        list.add("com.maple.smart.config.test");
+        AbsConfigBootstrap bootstrap = new LocalConfigBootstrap(true, 6767,
+                "application.properties", list);
         bootstrap.init();
 
         Service service = new Service();

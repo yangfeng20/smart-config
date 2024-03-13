@@ -2,3 +2,7 @@ com.maple.config.core.loader.ConfigLoader=com.maple.config.core.loader.StringLin
 com.maple.config.core.repository.ConfigRepository=com.maple.config.core.repository.DefaultConfigRepository
 com.maple.config.core.subscription.ConfigSubscription=com.maple.config.core.subscription.LocalConfigSubscription
 com.maple.config.core.listener.ConfigListener=com.maple.config.core.listener.AutoUpdateConfigListener
+
+org.springframework.boot.SpringApplicationRunListener=\
+org.springframework.boot.context.event.EventPublishingRunListener,\
+com.maple.config.core.spring.SmartConfigSpringRunListener

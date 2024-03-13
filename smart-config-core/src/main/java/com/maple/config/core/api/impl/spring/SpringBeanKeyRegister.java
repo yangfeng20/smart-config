@@ -1,8 +1,12 @@
 package com.maple.config.core.api.impl.spring;
 
+import com.maple.config.core.boot.SpringConfigBootstrap;
+import com.maple.config.core.subscription.ConfigSubscription;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -18,7 +22,9 @@ import java.util.regex.Pattern;
  * Description:
  */
 
-public class SpringBeanKeyRegister implements BeanPostProcessor {
+public class SpringBeanKeyRegister implements BeanPostProcessor, ApplicationContextAware {
+
+    private ApplicationContext applicationContext;
 
     private final Map<String, List<String>> beanKeyMap = new ConcurrentHashMap<>();
 
@@ -29,8 +35,11 @@ public class SpringBeanKeyRegister implements BeanPostProcessor {
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        SpringConfigBootstrap springConfigBootstrap = applicationContext.getBean(SpringConfigBootstrap.class);
+        ConfigSubscription configSubscription = springConfigBootstrap.getConfigSubscription();
         Class<?> clazz = bean.getClass();
         Field[] fields = clazz.getDeclaredFields();
+        //configSubscription.addSubscription(clazz);
 
         for (Field field : fields) {
             Value annotation = field.getAnnotation(Value.class);
@@ -65,5 +74,10 @@ public class SpringBeanKeyRegister implements BeanPostProcessor {
 
     public Map<String, List<Field>> getConfigObserverMap() {
         return configObserverMap;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }

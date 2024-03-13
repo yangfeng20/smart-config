@@ -1,4 +1,4 @@
-package com.maple;
+package com.maple.smart.config.test;
 
 import com.maple.config.core.annotation.SmartValue;
 
