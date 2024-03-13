@@ -13,4 +13,6 @@ import java.util.Collection;
 public interface ConfigLoader {
 
     Collection<ConfigEntity> loaderConfig(String path);
+
+    void setConfigInferDesc(boolean openConfigInferDesc);
 }

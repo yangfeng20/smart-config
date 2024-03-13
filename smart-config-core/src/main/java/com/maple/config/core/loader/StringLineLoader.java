@@ -41,12 +41,12 @@ public class StringLineLoader extends AbsConfigLoader {
         Date createDate = new Date();
         List<ConfigEntity> configEntityList = new ArrayList<>((int) (lineDataList.size() / 0.75) + 1);
         for (String lineStr : lineDataList) {
-            if (descInfer && lineStr.startsWith("#")) {
+            if (configInferDesc && lineStr.startsWith("#")) {
                 desc = lineStr.substring(1).trim();
                 continue;
             }
             // 过滤注释的配置
-            if (!descInfer && lineStr.startsWith("#")) {
+            if (!configInferDesc && lineStr.startsWith("#")) {
                 continue;
             }
             // 过滤空行和文件不规范的数据

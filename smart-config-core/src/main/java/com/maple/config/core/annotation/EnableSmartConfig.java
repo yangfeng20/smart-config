@@ -1,6 +1,6 @@
 package com.maple.config.core.annotation;
 
-import com.maple.config.core.api.impl.spring.SmartConfigRunner;
+//import com.maple.config.core.api.impl.spring.SmartConfigRunner;
 import com.maple.config.core.api.impl.spring.SpringBeanKeyRegister;
 import com.maple.config.core.api.impl.spring.SpringContext;
 import org.springframework.context.annotation.Import;
@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Import({SpringContext.class, SpringBeanKeyRegister.class, SmartConfigRunner.class})
+//@Import({SpringContext.class, SpringBeanKeyRegister.class, SmartConfigRunner.class})
 public @interface EnableSmartConfig {
 
     /**

@@ -1,6 +1,7 @@
 package com.maple.config.core.repository;
 
 import com.maple.config.core.model.ConfigEntity;
+import com.maple.config.core.subscription.ConfigSubscription;
 
 import java.util.Collection;
 
@@ -27,4 +28,8 @@ public interface ConfigRepository {
     void release();
 
     void loader(Collection<ConfigEntity> configEntityList);
+
+    void setSubscription(ConfigSubscription configSubscription);
+
+    void refresh();
 }

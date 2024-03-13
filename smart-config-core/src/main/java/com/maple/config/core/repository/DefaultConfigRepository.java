@@ -4,8 +4,10 @@ import com.maple.config.core.model.ConfigEntity;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author maple
@@ -43,15 +45,5 @@ public class DefaultConfigRepository extends AbsConfigRepository {
     @Override
     public boolean containsKey(String key) {
         return false;
-    }
-
-    @Override
-    public void release() {
-
-    }
-
-    @Override
-    public void loader(Collection<ConfigEntity> configEntityList) {
-
     }
 }

@@ -5,7 +5,7 @@ import com.maple.config.core.api.AbsSmartConfig;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.utils.ClassScanner;
 import com.maple.config.core.utils.TempConstant;
-import com.maple.config.core.web.ServerBootstrap;
+//import com.maple.config.core.web.ServerBootstrap;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -54,7 +54,7 @@ public class LocalFileConfig extends AbsSmartConfig {
         if (annotation == null) {
             return null;
         }
-        String[] split = annotation.value().split(":");
+        String[] split = annotation.value().split(":", 1);
         if (split.length == 0) {
             return annotation.value();
         }
@@ -117,7 +117,7 @@ public class LocalFileConfig extends AbsSmartConfig {
         }
         new Thread(() -> {
             try {
-                new ServerBootstrap(this).start(webUiPort);
+                //new ServerBootstrap(this).start(webUiPort);
             } catch (Exception e) {
                 throw new RuntimeException("Smart-config:启动webUi失败", e);
             }

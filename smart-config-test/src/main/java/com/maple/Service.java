@@ -1,34 +1,27 @@
 package com.maple;
 
-import org.springframework.beans.factory.annotation.Value;
-
-import java.util.List;
+import com.maple.config.core.annotation.SmartValue;
 
 /**
- * @author maple
- * Created Date: 2023/12/18 15:08
- * Description:
+ * @author yangfeng
+ * @date : 2023/12/4 9:54
+ * desc:
  */
 
-@org.springframework.stereotype.Service
 public class Service {
 
-    @Value("${aaa:111}")
-    private String val1;
+    @SmartValue("aaa:111")
+    private static String val;
+    @SmartValue("bbb:字段值")
+    private static String val1;
 
-    @Value("${bbb:222}")
-    private String val2;
+    @SmartValue("ddd:444")
+    private static String val2;
 
-    @Value("${ccc:ddd}")
-    private String val3;
-
-    @Value("list:[1,2,3]")
-    public List<Integer> list;
-
-
-    public void test01() {
+    public void test01(){
+        System.out.println("val = " + val);
         System.out.println("val1 = " + val1);
         System.out.println("val2 = " + val2);
-        System.out.println("val3 = " + val3);
+        System.out.println("-------------------------");
     }
 }

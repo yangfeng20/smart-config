@@ -1,8 +1,6 @@
 package com.maple.config.core.boot;
 
 import com.maple.config.core.control.WebOperationControlPanel;
-import com.maple.config.core.exp.SmartConfigApplicationException;
-import com.maple.config.core.listener.AutoUpdateConfigListener;
 import com.maple.config.core.listener.ConfigListener;
 import com.maple.config.core.loader.ConfigLoader;
 import com.maple.config.core.model.ConfigEntity;
@@ -10,11 +8,12 @@ import com.maple.config.core.repository.ConfigRepository;
 import com.maple.config.core.subscription.ConfigSubscription;
 import com.maple.config.core.subscription.LocalConfigSubscription;
 import com.maple.config.core.utils.ClassScanner;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.*;
 
 /**
@@ -28,6 +27,7 @@ public class LocalConfigBootstrap {
     /**
      * 配置描述推断
      */
+    @Setter
     private boolean descInfer;
 
     /**
@@ -38,11 +38,13 @@ public class LocalConfigBootstrap {
     /**
      * 本地文件地址
      */
+    @Setter
     private String localConfigPath;
 
     /**
      * 类扫描路径
      */
+    @Setter
     private List<String> packagePathList;
 
 
@@ -54,22 +56,18 @@ public class LocalConfigBootstrap {
 
     public void init() {
 
-        // todo spi 动态加载实现类
         loaderSpiImpl();
 
-        loaderConfig();
+        loaderConfigToRepository();
 
         // 扫描类并添加订阅
         List<Class<?>> scanClass = scanClass();
         for (Class<?> clazz : scanClass) {
-            Field[] fields = clazz.getDeclaredFields();
-            for (Field field : fields) {
-                configSubscription.addSubscription(field);
-            }
+            configSubscription.addSubscription(clazz);
         }
 
-        // todo 字段赋值 订阅者添加到配置仓库，配置参数发布，通知订阅者
-        configSubscription.refresh();
+
+        configRepository.refresh();
     }
 
     private void loaderSpiImpl() {
@@ -91,9 +89,11 @@ public class LocalConfigBootstrap {
 
         // 配置订阅者
         configSubscription = SpringFactoriesLoader.loadFactories(ConfigSubscription.class, LocalConfigBootstrap.class.getClassLoader()).get(0);
+        this.configRepository.setSubscription(configSubscription);
         if (configSubscription == null) {
             ServiceLoader.load(ConfigSubscription.class).forEach(configSubscription -> {
                 this.configSubscription = configSubscription;
+                this.configRepository.setSubscription(configSubscription);
             });
         }
 
@@ -103,7 +103,7 @@ public class LocalConfigBootstrap {
         ServiceLoader.load(ConfigListener.class).forEach(configListener -> configSubscription.addListener(configListener));
     }
 
-    private void loaderConfig() {
+    private void loaderConfigToRepository() {
         for (ConfigLoader configLoader : configLoaderList) {
             Collection<ConfigEntity> configEntityList = configLoader.loaderConfig(localConfigPath);
             configRepository.loader(configEntityList);

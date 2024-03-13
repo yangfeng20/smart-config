@@ -1,4 +1,4 @@
-package com.maple;
+package com.maple.smart.config.test.spring;
 
 
 import com.maple.config.core.annotation.EnableSmartConfig;
@@ -11,19 +11,21 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 
 /**
- * @author yang'feng
+ * @author maple
+ * Created Date: 2024/3/13 22:00
+ * Description:
  */
+
 @RestController
 @EnableSmartConfig
 @SpringBootApplication
-public class SpringbootApplication {
-
+public class TestSpringApplication {
     @Resource
     private Service service;
 
 
     public static void main(String[] args) throws Exception {
-        ConfigurableApplicationContext application = SpringApplication.run(SpringbootApplication.class, args);
+        ConfigurableApplicationContext application = SpringApplication.run(TestSpringApplication.class, args);
 
         System.out.println(application.getBean(Service.class).list);
     }
@@ -36,4 +38,3 @@ public class SpringbootApplication {
 
 
 }
-

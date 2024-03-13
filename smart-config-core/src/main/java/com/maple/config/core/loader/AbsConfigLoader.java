@@ -14,8 +14,10 @@ import java.util.List;
 
 public abstract class AbsConfigLoader implements ConfigLoader {
 
-    protected List<ConfigEntity> configEntityList = new ArrayList<>();
+    protected boolean configInferDesc;
 
-    protected boolean descInfer;
-
+    @Override
+    public void setConfigInferDesc(boolean openConfigInferDesc) {
+        this.configInferDesc = openConfigInferDesc;
+    }
 }

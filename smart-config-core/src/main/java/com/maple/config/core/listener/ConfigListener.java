@@ -2,6 +2,8 @@ package com.maple.config.core.listener;
 
 import com.maple.config.core.model.ConfigEntity;
 
+import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -12,6 +14,10 @@ import java.util.List;
 
 public interface ConfigListener {
 
+    void propertyInject(ConfigEntity configEntity, List<Field> fieldList);
 
-    void onChange(List<ConfigEntity> chnageConfigEntityList);
+
+    void onChange(Collection<ConfigEntity> changeConfigEntityList);
+
+    Object getObjectByKey(String configKey);
 }
