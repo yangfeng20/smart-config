@@ -6,7 +6,7 @@ import com.maple.config.core.annotation.SmartValue;
 import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.subscription.ConfigSubscription;
-import org.springframework.beans.factory.annotation.Value;
+import com.maple.config.core.utils.ClassUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -35,8 +35,23 @@ public class AutoUpdateConfigListener implements ConfigListener {
         this.configSubscription = configSubscription;
     }
 
+    protected boolean isSimpleTypeAnnotation(Field field) {
+        return field.isAnnotationPresent(SmartValue.class);
+    }
+
     protected Object getValue(Field field, String configValue) {
-        if (field.isAnnotationPresent(SmartValue.class) || field.isAnnotationPresent(Value.class)) {
+        // 配置文件中当前字段key没有对应值，查看字段的直接上是否有默认值
+        if (configValue == null) {
+            configValue = ClassUtils.resolveAnnotation(field.getAnnotation(SmartValue.class)).getValue();
+            if (configValue == null) {
+                configValue = ClassUtils.resolveAnnotation(field.getAnnotation(JsonValue.class)).getValue();
+            }
+        }
+        if (configValue == null) {
+            throw new SmartConfigApplicationException("todo debug 空数据");
+        }
+
+        if (isSimpleTypeAnnotation(field)) {
             Class<?> fieldType = field.getType();
 
             if (String.class.isAssignableFrom(fieldType)) {
@@ -60,7 +75,6 @@ public class AutoUpdateConfigListener implements ConfigListener {
             } else {
                 throw new IllegalArgumentException("Unsupported Number type: " + fieldType.getName());
             }
-
         }
 
         if (field.isAnnotationPresent(JsonValue.class)) {
@@ -82,6 +96,7 @@ public class AutoUpdateConfigListener implements ConfigListener {
                     field.set(fieldTargetObj, fieldValue);
                 }
             } catch (IllegalAccessException e) {
+                // todo 日志
                 e.printStackTrace();
             }
         });

@@ -1,17 +1,24 @@
 package com.maple.config.core.utils;
 
+import com.maple.config.core.exp.SmartConfigApplicationException;
+import javafx.util.Pair;
+
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.regex.Matcher;
 
 /**
  * @author maple
  */
-public class ClassScanner {
+public class ClassUtils {
     public static List<Class<?>> getClasses(String packageName) throws ClassNotFoundException, IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         String path = packageName.replace('.', '/');
@@ -34,7 +41,7 @@ public class ClassScanner {
             return classes;
         }
         File[] files = directory.listFiles();
-        if (files == null){
+        if (files == null) {
             return classes;
         }
         for (File file : files) {
@@ -46,5 +53,33 @@ public class ClassScanner {
             }
         }
         return classes;
+    }
+
+    public static Pair<String, String> resolveAnnotation(Annotation annotation) {
+        if (annotation == null) {
+            return new Pair<>(null, null);
+        }
+        Class<? extends Annotation> annotationClazz = annotation.annotationType();
+        String annotationValue;
+        try {
+            Method annotationValueMethod = annotationClazz.getDeclaredMethod("value");
+            annotationValue = (String) annotationValueMethod.invoke(annotation);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new SmartConfigApplicationException(e);
+        }
+
+        Pair<Boolean, Pair<Integer, Integer>> existPlaceholderAndIndexPair = PlaceholderResolver.containsSimplePlaceholder(annotationValue);
+        if (!existPlaceholderAndIndexPair.getKey()) {
+            return new Pair<>(null, null);
+        }
+        Pair<Integer, Integer> indexPair = existPlaceholderAndIndexPair.getValue();
+        String notExistPlaceholderText = annotationValue.substring(indexPair.getKey(), indexPair.getValue());
+        String[] keyAndDefaultValArr = notExistPlaceholderText.split(":");
+        if (keyAndDefaultValArr.length == 1) {
+            return new Pair<>(keyAndDefaultValArr[0], null);
+        }
+
+        // todo 默认值中存在占位符
+        return new Pair<>(keyAndDefaultValArr[0], keyAndDefaultValArr[1]);
     }
 }

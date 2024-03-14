@@ -34,7 +34,7 @@ public class ConfigVO {
         configVO.setValue(configEntity.getValue());
         configVO.setDesc(configEntity.getDesc());
         configVO.setStatus(ReleaseStatusEnum.getByCode(configEntity.getStatus()).getDesc());
-        configVO.setDurable(String.valueOf(configEntity.getDurable()));
+        configVO.setDurable(String.valueOf(configEntity.isDurable()));
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         if (configEntity.getCreateDate()!=null){

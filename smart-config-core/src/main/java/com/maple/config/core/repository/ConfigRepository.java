@@ -22,6 +22,9 @@ public interface ConfigRepository {
     Object getConfig(String key);
 
     Collection<ConfigEntity> configList();
+    Collection<ConfigEntity> resolvedPlaceholdersConfigList();
+
+    String resolvePlaceholders(String text);
 
     boolean containsKey(String key);
 

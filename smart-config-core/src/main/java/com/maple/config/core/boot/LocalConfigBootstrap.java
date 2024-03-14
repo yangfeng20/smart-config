@@ -4,7 +4,7 @@ import com.maple.config.core.listener.ConfigListener;
 import com.maple.config.core.loader.ConfigLoader;
 import com.maple.config.core.repository.ConfigRepository;
 import com.maple.config.core.subscription.ConfigSubscription;
-import com.maple.config.core.utils.ClassScanner;
+import com.maple.config.core.utils.ClassUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public class LocalConfigBootstrap extends AbsConfigBootstrap {
         List<Class<?>> scannerResult = new ArrayList<>();
         for (String packagePath : packagePathList) {
             try {
-                List<Class<?>> classes = ClassScanner.getClasses(packagePath);
+                List<Class<?>> classes = ClassUtils.getClasses(packagePath);
                 scannerResult.addAll(classes);
             } catch (ClassNotFoundException | IOException e) {
                 throw new RuntimeException(e);

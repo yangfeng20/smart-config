@@ -3,7 +3,7 @@ package com.maple.config.core.api.impl.local;
 import com.maple.config.core.annotation.SmartValue;
 import com.maple.config.core.api.AbsSmartConfig;
 import com.maple.config.core.model.ConfigEntity;
-import com.maple.config.core.utils.ClassScanner;
+import com.maple.config.core.utils.ClassUtils;
 import com.maple.config.core.utils.TempConstant;
 //import com.maple.config.core.web.ServerBootstrap;
 
@@ -98,7 +98,7 @@ public class LocalFileConfig extends AbsSmartConfig {
         List<Class<?>> scannerResult = new ArrayList<>();
         for (String packagePath : packagePathList) {
             try {
-                List<Class<?>> classes = ClassScanner.getClasses(packagePath);
+                List<Class<?>> classes = ClassUtils.getClasses(packagePath);
                 scannerResult.addAll(classes);
             } catch (ClassNotFoundException | IOException e) {
                 throw new RuntimeException(e);

@@ -4,19 +4,13 @@ import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.listener.ConfigListener;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.repository.ConfigRepository;
+import com.maple.config.core.utils.ClassUtils;
 import com.maple.config.core.utils.Lists;
-import com.maple.config.core.utils.SmartConfigConstant;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 /**
@@ -76,27 +70,27 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
 
     @Override
     public void subscribe(List<ConfigEntity> configEntityList) {
-        configListeners.forEach(configListener -> {
-            configListener.onChange(configEntityList);
-        });
+        configListeners.forEach(configListener -> configListener.onChange(configEntityList));
     }
 
     @Override
     public List<Object> getFocusObjListByKey(String key) {
-        return null;
+        return configSubscriberObjMap.get(key);
     }
 
     @Override
     public void refresh(ConfigRepository configRepository) {
-        Map<String, ConfigEntity> configEntityMap = configRepository.configList().stream().collect(Collectors.toMap(ConfigEntity::getKey, Function.identity()));
+        Map<String, ConfigEntity> configEntityMap = configRepository.resolvedPlaceholdersConfigList()
+                .stream()
+                .collect(Collectors.toMap(ConfigEntity::getKey, Function.identity()));
         for (Map.Entry<String, List<Field>> entry : configSubscriberMap.entrySet()) {
             String configKey = entry.getKey();
             List<Field> focusFieldList = entry.getValue();
-            ConfigEntity configEntity = configEntityMap.get(configKey);
 
-            configListeners.forEach(configListener -> {
-                configListener.propertyInject(configEntity, focusFieldList);
-            });
+            // 字段上的配置key在配置文件中找不到时，给出空配置实体【字段注解上可能有默认值】
+            ConfigEntity configEntity = Optional.ofNullable(configEntityMap.get(configKey)).orElse(new ConfigEntity(configKey));
+
+            configListeners.forEach(configListener -> configListener.propertyInject(configEntity, focusFieldList));
         }
     }
 
@@ -124,26 +118,6 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
     protected abstract String doParseKey(Field field);
 
     protected String resolveAnnotation(Annotation annotation) {
-        if (annotation == null) {
-            return null;
-        }
-        Class<? extends Annotation> annotationClazz = annotation.annotationType();
-        String annotationValue;
-        try {
-            Method annotationValueMethod = annotationClazz.getDeclaredMethod("value");
-            annotationValue = (String) annotationValueMethod.invoke(annotation);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new SmartConfigApplicationException(e);
-        }
-
-        Matcher matcher = SmartConfigConstant.PLACEHOLDER_PATTERN.matcher(annotationValue);
-        if (!matcher.find()) {
-            return "";
-        }
-        String valueText = matcher.group(1);
-        String configKey = valueText.split(":")[0];
-        // todo 默认值
-        System.out.println("value.split(\":\")[1] = " + valueText.split(":")[1]);
-        return configKey;
+        return ClassUtils.resolveAnnotation(annotation).getKey();
     }
 }

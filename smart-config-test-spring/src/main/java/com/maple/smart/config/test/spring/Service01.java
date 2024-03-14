@@ -1,6 +1,7 @@
 package com.maple.smart.config.test.spring;
 
 import com.maple.config.core.annotation.JsonValue;
+import com.maple.config.core.annotation.SmartValue;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -20,10 +21,10 @@ import java.util.List;
 @Service
 public class Service01 {
 
-    @Value("${aaa:111}")
+    @Value("${aaa:111-${bbb}}")
     private String val1;
 
-    @Value("${bbb:222}")
+    @SmartValue("${bbb:222}")
     private String val2;
 
     @Value("${ccc:ddd}")
