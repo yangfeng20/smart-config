@@ -1,4 +1,4 @@
-package com.maple.config.core.api.impl.spring;
+package com.maple.config.core.spring;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -13,13 +13,13 @@ import java.util.Map;
  * Description:
  */
 
-public class SpringContext implements ApplicationContextAware {
+public class SmartConfigSpringContext implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        SpringContext.applicationContext = applicationContext;
+        SmartConfigSpringContext.applicationContext = applicationContext;
     }
 
     /**

@@ -2,9 +2,8 @@ package com.maple.config.core.subscription;
 
 import com.maple.config.core.annotation.JsonValue;
 import com.maple.config.core.annotation.SmartValue;
-import com.maple.config.core.exp.SmartConfigApplicationException;
-import com.maple.config.core.repository.ConfigRepository;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 /**
@@ -21,28 +20,15 @@ public class LocalConfigSubscription extends AbsConfigSubscription {
     }
 
     @Override
-    protected String parseKey(Field field) {
-        SmartValue smartValue = field.getAnnotation(SmartValue.class);
-        JsonValue jsonValue = field.getAnnotation(JsonValue.class);
-        if (smartValue != null && jsonValue != null) {
-            throw new SmartConfigApplicationException("@SmartValue and @JsonValue cannot exist at the same time");
-        }
+    protected String doParseKey(Field field) {
+        Annotation smartValue = field.getAnnotation(SmartValue.class);
+        Annotation jsonValue = field.getAnnotation(JsonValue.class);
         if (smartValue != null) {
-            String[] split = smartValue.value().split(":", 1);
-            if (split.length == 0) {
-                return smartValue.value();
-            }
-            return split[0];
+            return resolveAnnotation(smartValue);
         }
-
         if (jsonValue != null) {
-            String[] split = jsonValue.value().split(":", 1);
-            if (split.length == 0) {
-                return jsonValue.value();
-            }
-            return split[0];
+            return resolveAnnotation(jsonValue);
         }
-        throw new SmartConfigApplicationException("The 【focus】 method fails to properly focus on the field");
+        return null;
     }
-
 }

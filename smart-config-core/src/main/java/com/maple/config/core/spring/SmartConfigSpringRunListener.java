@@ -69,7 +69,10 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
 
     @Override
     public void started(ConfigurableApplicationContext context) {
-        System.out.println("context = " + context);
+        if (!enableSmartConfig) {
+            return;
+        }
+        smartConfigBootstrap.refreshConfig();
 
     }
 

@@ -1,6 +1,7 @@
 package com.maple.config.core.listener;
 
 import com.maple.config.core.model.ConfigEntity;
+import com.maple.config.core.subscription.ConfigSubscription;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -19,5 +20,7 @@ public interface ConfigListener {
 
     void onChange(Collection<ConfigEntity> changeConfigEntityList);
 
-    Object getObjectByKey(String configKey);
+    List<Object> getObjectListByKey(String configKey);
+
+    void setConfigSubscription(ConfigSubscription configSubscription);
 }

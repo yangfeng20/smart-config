@@ -5,6 +5,7 @@ import com.maple.config.core.annotation.JsonValue;
 import com.maple.config.core.annotation.SmartValue;
 import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.model.ConfigEntity;
+import com.maple.config.core.subscription.ConfigSubscription;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.lang.reflect.Field;
@@ -21,9 +22,17 @@ import java.util.List;
  */
 
 public class AutoUpdateConfigListener implements ConfigListener {
+
+    private ConfigSubscription configSubscription;
+
     @Override
-    public Object getObjectByKey(String configKey) {
-        return null;
+    public List<Object> getObjectListByKey(String configKey) {
+        return configSubscription.getFocusObjListByKey(configKey);
+    }
+
+    @Override
+    public void setConfigSubscription(ConfigSubscription configSubscription) {
+        this.configSubscription = configSubscription;
     }
 
     protected Object getValue(Field field, String configValue) {
@@ -68,8 +77,10 @@ public class AutoUpdateConfigListener implements ConfigListener {
             field.setAccessible(true);
             try {
                 Object fieldValue = getValue(field, configEntity.getValue());
-                Object fieldTargetObj = getObjectByKey(configEntity.getKey());
-                field.set(fieldTargetObj, fieldValue);
+                List<Object> fieldTargetObjList = getObjectListByKey(configEntity.getKey());
+                for (Object fieldTargetObj : fieldTargetObjList) {
+                    field.set(fieldTargetObj, fieldValue);
+                }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }

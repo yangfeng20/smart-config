@@ -4,9 +4,10 @@ import com.maple.config.core.listener.ConfigListener;
 import com.maple.config.core.loader.ConfigLoader;
 import com.maple.config.core.repository.ConfigRepository;
 import com.maple.config.core.subscription.ConfigSubscription;
-import org.springframework.core.io.support.SpringFactoriesLoader;
-import org.springframework.util.CollectionUtils;
+import com.maple.config.core.utils.ClassScanner;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 
@@ -21,6 +22,38 @@ public class LocalConfigBootstrap extends AbsConfigBootstrap {
 
     public LocalConfigBootstrap(boolean descInfer, int webUiPort, String localConfigPath, List<String> packagePathList) {
         super(descInfer, webUiPort, localConfigPath, packagePathList);
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        scanClassAndSubscription();
+    }
+
+    private void scanClassAndSubscription() {
+        // 扫描类并添加订阅
+        List<Class<?>> scanClass = scanClass();
+        for (Class<?> clazz : scanClass) {
+            configSubscription.addSubscription(clazz);
+        }
+    }
+
+    public List<Class<?>> scanClass() {
+        if (packagePathList == null || packagePathList.isEmpty()) {
+            throw new IllegalArgumentException("请指定包名路径");
+        }
+
+        List<Class<?>> scannerResult = new ArrayList<>();
+        for (String packagePath : packagePathList) {
+            try {
+                List<Class<?>> classes = ClassScanner.getClasses(packagePath);
+                scannerResult.addAll(classes);
+            } catch (ClassNotFoundException | IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return scannerResult;
     }
 
     @Override

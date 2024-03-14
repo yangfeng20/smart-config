@@ -1,6 +1,7 @@
 package com.maple.config.core.boot;
 
 import com.maple.config.core.control.WebOperationControlPanel;
+import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.loader.ConfigLoader;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.repository.ConfigRepository;
@@ -24,22 +25,22 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
     /**
      * 配置描述推断
      */
-    private final boolean descInfer;
+    protected final boolean descInfer;
 
     /**
      * WebUI端口
      */
-    private int webUiPort;
+    protected int webUiPort;
 
     /**
      * 本地文件地址
      */
-    private final String localConfigPath;
+    protected final String localConfigPath;
 
     /**
      * 类扫描路径
      */
-    private final List<String> packagePathList;
+    protected final List<String> packagePathList;
 
     public AbsConfigBootstrap(boolean descInfer, int webUiPort, String localConfigPath, List<String> packagePathList) {
         this.descInfer = descInfer;
@@ -61,43 +62,21 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
         loaderConfigToRepository();
     }
 
-    public void start() {
-        // 扫描类并添加订阅
-        List<Class<?>> scanClass = scanClass();
-        for (Class<?> clazz : scanClass) {
-            configSubscription.addSubscription(clazz);
-        }
-
-
-        configRepository.refresh();
-    }
-
     public abstract void loaderSpiImpl();
 
     public void loaderConfigToRepository() {
         for (ConfigLoader configLoader : configLoaderList) {
+            configLoader.setConfigInferDesc(descInfer);
             Collection<ConfigEntity> configEntityList = configLoader.loaderConfig(localConfigPath);
             configRepository.loader(configEntityList);
         }
     }
 
+    @Override
+    public void refreshConfig() {
+        configRepository.refresh();
 
-    public List<Class<?>> scanClass() {
-        if (packagePathList == null || packagePathList.isEmpty()) {
-            throw new IllegalArgumentException("请指定包名路径");
-        }
-
-        List<Class<?>> scannerResult = new ArrayList<>();
-        for (String packagePath : packagePathList) {
-            try {
-                List<Class<?>> classes = ClassScanner.getClasses(packagePath);
-                scannerResult.addAll(classes);
-            } catch (ClassNotFoundException | IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return scannerResult;
+        startWebUi();
     }
 
     public void startWebUi() {
@@ -109,8 +88,8 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
             try {
                 webOperationControlPanel.start();
             } catch (Exception e) {
-                throw new RuntimeException("Smart-config:启动webUi失败", e);
+                throw new SmartConfigApplicationException("Smart-config:启动webUi失败", e);
             }
-        }).start();
+        }, "smartConfig-web").start();
     }
 }

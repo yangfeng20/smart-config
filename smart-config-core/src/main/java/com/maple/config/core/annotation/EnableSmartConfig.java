@@ -1,7 +1,7 @@
 package com.maple.config.core.annotation;
 
-import com.maple.config.core.api.impl.spring.SpringBeanKeyRegister;
-import com.maple.config.core.api.impl.spring.SpringContext;
+import com.maple.config.core.spring.SpringConfigSubscriptionPostProcessor;
+import com.maple.config.core.spring.SmartConfigSpringContext;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;
@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Import({SpringContext.class, SpringBeanKeyRegister.class})
+@Import({SmartConfigSpringContext.class, SpringConfigSubscriptionPostProcessor.class})
 public @interface EnableSmartConfig {
 
     /**

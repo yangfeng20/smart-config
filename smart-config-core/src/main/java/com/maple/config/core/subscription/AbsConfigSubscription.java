@@ -1,14 +1,22 @@
 package com.maple.config.core.subscription;
 
+import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.listener.ConfigListener;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.repository.ConfigRepository;
+import com.maple.config.core.utils.Lists;
+import com.maple.config.core.utils.SmartConfigConstant;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 /**
@@ -19,13 +27,15 @@ import java.util.stream.Collectors;
 
 public abstract class AbsConfigSubscription implements ConfigSubscription {
 
-    protected Map<String, List<Field>> configSubscriberMap;
+    protected Map<String, List<Field>> configSubscriberMap = new HashMap<>(16);
 
+    protected Map<String, List<Object>> configSubscriberObjMap = new HashMap<>(16);
 
     protected List<ConfigListener> configListeners = new ArrayList<>();
 
     @Override
     public void addSubscription(Class<?> clazz) {
+        // todo 是否初始化赋值，@SmartValue @JsonValue  不需要：@Value
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             this.addSubscription(field);
@@ -33,7 +43,17 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
     }
 
     @Override
-    public void addSubscription(Field field) {
+    public void addSubscription(Object object) {
+        Class<?> clazz = object.getClass();
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            this.addSubscription(field, object);
+        }
+    }
+
+
+    @Override
+    public void addSubscription(Field field, Object targetObj) {
         if (!focus(field)) {
             return;
         }
@@ -42,10 +62,16 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
         if (configSubscriberMap.containsKey(configKey)) {
             configSubscriberMap.get(configKey).add(field);
         } else {
-            List<Field> fieldList = new ArrayList<>();
-            fieldList.add(field);
-            configSubscriberMap.put(configKey, fieldList);
+            configSubscriberMap.put(configKey, Lists.newArrayList(field));
         }
+
+        configSubscriberObjMap.compute(configKey, (key, targetObjList) -> {
+            if (targetObjList != null) {
+                targetObjList.add(targetObj);
+                return targetObjList;
+            }
+            return Lists.newArrayList(targetObj);
+        });
     }
 
     @Override
@@ -53,6 +79,11 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
         configListeners.forEach(configListener -> {
             configListener.onChange(configEntityList);
         });
+    }
+
+    @Override
+    public List<Object> getFocusObjListByKey(String key) {
+        return null;
     }
 
     @Override
@@ -74,10 +105,45 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
         if (configListeners.contains(configListener)) {
             return;
         }
+        configListener.setConfigSubscription(this);
         configListeners.add(configListener);
     }
 
     protected abstract boolean focus(Field field);
 
-    protected abstract String parseKey(Field field);
+
+    protected String parseKey(Field field) {
+
+        String configKey = doParseKey(field);
+        if (configKey == null || configKey.isEmpty()) {
+            throw new SmartConfigApplicationException(field.getClass() + "." + field.getName() + "configKey is null or empty");
+        }
+        return configKey;
+    }
+
+    protected abstract String doParseKey(Field field);
+
+    protected String resolveAnnotation(Annotation annotation) {
+        if (annotation == null) {
+            return null;
+        }
+        Class<? extends Annotation> annotationClazz = annotation.annotationType();
+        String annotationValue;
+        try {
+            Method annotationValueMethod = annotationClazz.getDeclaredMethod("value");
+            annotationValue = (String) annotationValueMethod.invoke(annotation);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new SmartConfigApplicationException(e);
+        }
+
+        Matcher matcher = SmartConfigConstant.PLACEHOLDER_PATTERN.matcher(annotationValue);
+        if (!matcher.find()) {
+            return "";
+        }
+        String valueText = matcher.group(1);
+        String configKey = valueText.split(":")[0];
+        // todo 默认值
+        System.out.println("value.split(\":\")[1] = " + valueText.split(":")[1]);
+        return configKey;
+    }
 }

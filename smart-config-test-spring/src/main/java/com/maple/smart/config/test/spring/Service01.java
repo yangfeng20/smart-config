@@ -6,6 +6,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
  * Description:
  */
 
-@org.springframework.stereotype.Service
+@Service
 public class Service01 {
 
     @Value("${aaa:111}")
@@ -28,7 +29,7 @@ public class Service01 {
     @Value("${ccc:ddd}")
     private String val3;
 
-    @JsonValue("list:[1,2,3]")
+    @JsonValue("${list:[1,2,3]}")
     public List<Integer> list;
 
 

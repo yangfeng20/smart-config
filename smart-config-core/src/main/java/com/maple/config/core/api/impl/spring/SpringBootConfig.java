@@ -1,9 +1,9 @@
 package com.maple.config.core.api.impl.spring;
 
 import com.maple.config.core.annotation.SmartValue;
-import com.maple.config.core.api.SmartConfig;
 import com.maple.config.core.api.impl.local.LocalFileConfig;
-import org.springframework.beans.factory.annotation.Value;
+import com.maple.config.core.spring.SpringConfigSubscriptionPostProcessor;
+import com.maple.config.core.spring.SmartConfigSpringContext;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -30,9 +30,9 @@ public class SpringBootConfig extends LocalFileConfig {
     @Override
     protected void customInit() {
         super.customInit();
-        SpringBeanKeyRegister springBeanKeyRegister = SpringContext.getBean(SpringBeanKeyRegister.class);
-        beanKeyNameMap = springBeanKeyRegister.getBeanKeyMap();
-        configObserverMap = springBeanKeyRegister.getConfigObserverMap();
+        SpringConfigSubscriptionPostProcessor springConfigSubscriptionPostProcessor = SmartConfigSpringContext.getBean(SpringConfigSubscriptionPostProcessor.class);
+        //beanKeyNameMap = springBeanKeyRegister.getBeanKeyMap();
+        //configObserverMap = springBeanKeyRegister.getConfigObserverMap();
     }
 
     @Override
@@ -42,7 +42,8 @@ public class SpringBootConfig extends LocalFileConfig {
             return null;
         }
 
-        Matcher matcher = SpringBeanKeyRegister.PLACEHOLDER_PATTERN.matcher(annotation.value());
+        //Matcher matcher = SpringConfigSubscriptionPostProcessor.PLACEHOLDER_PATTERN.matcher(annotation.value());
+        Matcher matcher =null;
         if (!matcher.find()) {
             return null;
         }
@@ -81,7 +82,7 @@ public class SpringBootConfig extends LocalFileConfig {
         }
 
         return beanNameList.stream()
-                .map(SpringContext::getBean)
+                .map(SmartConfigSpringContext::getBean)
                 .collect(Collectors.toList());
     }
 
