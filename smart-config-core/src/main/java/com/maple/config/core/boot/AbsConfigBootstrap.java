@@ -47,7 +47,6 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
         this.packagePathList = packagePathList;
     }
 
-    @Getter
     protected ConfigRepository configRepository;
 
     protected final List<ConfigLoader> configLoaderList = new ArrayList<>();
@@ -68,6 +67,11 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
             Collection<ConfigEntity> configEntityList = configLoader.loaderConfig(localConfigPath);
             configRepository.loader(configEntityList);
         }
+    }
+
+    @Override
+    public ConfigRepository getConfigRepository() {
+        return configRepository;
     }
 
     @Override

@@ -5,6 +5,8 @@ import com.maple.config.core.annotation.JsonValue;
 import com.maple.config.core.annotation.SmartValue;
 import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.model.ConfigEntity;
+import com.maple.config.core.repository.ConfigRepository;
+import com.maple.config.core.spring.SmartConfigSpringContext;
 import com.maple.config.core.subscription.ConfigSubscription;
 import com.maple.config.core.utils.ClassUtils;
 
@@ -39,13 +41,17 @@ public class AutoUpdateConfigListener implements ConfigListener {
         return field.isAnnotationPresent(SmartValue.class);
     }
 
-    protected Object getValue(Field field, String configValue) {
+    protected String resolveFieldDefaultValue(Field field) {
+        ConfigRepository configRepository = SmartConfigSpringContext.getBean(ConfigRepository.class);
+        String configValue = ClassUtils.resolveAnnotation(field.getAnnotation(SmartValue.class), configRepository::getConfig).getValue();
+        return configValue != null ? configValue : ClassUtils.resolveAnnotation(field.getAnnotation(JsonValue.class),
+                configRepository::getConfig).getValue();
+    }
+
+    protected Object resolveValue(Field field, String configValue) {
         // 配置文件中当前字段key没有对应值，查看字段的直接上是否有默认值
         if (configValue == null) {
-            configValue = ClassUtils.resolveAnnotation(field.getAnnotation(SmartValue.class)).getValue();
-            if (configValue == null) {
-                configValue = ClassUtils.resolveAnnotation(field.getAnnotation(JsonValue.class)).getValue();
-            }
+            configValue = resolveFieldDefaultValue(field);
         }
         if (configValue == null) {
             throw new SmartConfigApplicationException("todo debug 空数据");
@@ -90,7 +96,7 @@ public class AutoUpdateConfigListener implements ConfigListener {
         fieldList.forEach(field -> {
             field.setAccessible(true);
             try {
-                Object fieldValue = getValue(field, configEntity.getValue());
+                Object fieldValue = resolveValue(field, configEntity.getValue());
                 List<Object> fieldTargetObjList = getObjectListByKey(configEntity.getKey());
                 for (Object fieldTargetObj : fieldTargetObjList) {
                     field.set(fieldTargetObj, fieldValue);

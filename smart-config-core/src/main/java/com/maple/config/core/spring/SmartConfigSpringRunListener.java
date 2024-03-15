@@ -8,9 +8,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringApplicationRunListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.PropertySource;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -59,6 +57,7 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
 
         ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
         beanFactory.registerSingleton("smartConfigBootstrap", smartConfigBootstrap);
+        beanFactory.registerSingleton("configRepository", smartConfigBootstrap.getConfigRepository());
     }
 
     @Override

@@ -42,6 +42,7 @@ public abstract class AbsConfigRepository implements ConfigRepository {
 
     @Override
     public boolean addConfig(ConfigEntity configEntity) {
+        // todo 合并，实现
         return false;
     }
 
@@ -52,17 +53,17 @@ public abstract class AbsConfigRepository implements ConfigRepository {
 
     @Override
     public ConfigEntity getConfigEntity(String key) {
-        return null;
+        return configEntityMap.get(key);
     }
 
     @Override
-    public Object getConfig(String key) {
-        return null;
+    public String getConfig(String key) {
+        return configEntityMap.getOrDefault(key, new ConfigEntity()).getValue();
     }
 
     @Override
     public boolean containsKey(String key) {
-        return false;
+        return configEntityMap.containsKey(key);
     }
 
     @Override

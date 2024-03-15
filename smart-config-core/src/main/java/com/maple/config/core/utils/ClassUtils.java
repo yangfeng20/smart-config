@@ -13,6 +13,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 
 /**
@@ -55,7 +56,12 @@ public class ClassUtils {
         return classes;
     }
 
-    public static Pair<String, String> resolveAnnotation(Annotation annotation) {
+    public static String resolveAnnotationKey(Annotation annotation) {
+        return resolveAnnotation(annotation, null).getKey();
+
+    }
+
+    public static Pair<String, String> resolveAnnotation(Annotation annotation, Function<String, String> keyResolver) {
         if (annotation == null) {
             return new Pair<>(null, null);
         }
@@ -79,7 +85,11 @@ public class ClassUtils {
             return new Pair<>(keyAndDefaultValArr[0], null);
         }
 
-        // todo 默认值中存在占位符
-        return new Pair<>(keyAndDefaultValArr[0], keyAndDefaultValArr[1]);
+        // 解析默认值中可能存在的占位符
+        String defaultValue = keyAndDefaultValArr[1];
+        if (keyResolver != null) {
+            defaultValue = PlaceholderResolver.defResolveText(defaultValue, keyResolver);
+        }
+        return new Pair<>(keyAndDefaultValArr[0], defaultValue);
     }
 }

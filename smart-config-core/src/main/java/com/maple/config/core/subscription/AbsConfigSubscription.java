@@ -118,6 +118,6 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
     protected abstract String doParseKey(Field field);
 
     protected String resolveAnnotation(Annotation annotation) {
-        return ClassUtils.resolveAnnotation(annotation).getKey();
+        return ClassUtils.resolveAnnotationKey(annotation);
     }
 }

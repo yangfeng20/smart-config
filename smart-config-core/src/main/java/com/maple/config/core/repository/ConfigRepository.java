@@ -19,7 +19,7 @@ public interface ConfigRepository {
 
     ConfigEntity getConfigEntity(String key);
 
-    Object getConfig(String key);
+    String getConfig(String key);
 
     Collection<ConfigEntity> configList();
     Collection<ConfigEntity> resolvedPlaceholdersConfigList();
