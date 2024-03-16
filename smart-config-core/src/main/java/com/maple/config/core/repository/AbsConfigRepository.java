@@ -1,5 +1,6 @@
 package com.maple.config.core.repository;
 
+import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.subscription.ConfigSubscription;
 import com.maple.config.core.utils.PlaceholderResolver;
@@ -42,8 +43,13 @@ public abstract class AbsConfigRepository implements ConfigRepository {
 
     @Override
     public boolean addConfig(ConfigEntity configEntity) {
-        // todo 合并，实现
-        return false;
+        if (configEntity == null || configEntity.getKey() == null || configEntity.getKey().isEmpty()) {
+            throw new SmartConfigApplicationException("config key is not empty");
+        }
+
+        boolean containsKey = configEntityMap.containsKey(configEntity.getKey());
+        configEntityMap.put(configEntity.getKey(), configEntity);
+        return containsKey;
     }
 
     @Override
