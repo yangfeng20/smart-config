@@ -155,7 +155,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                 }
             } catch (IllegalAccessException e) {
                 // todo 日志
-                e.printStackTrace();
+                throw new SmartConfigApplicationException(e);
             }
         });
     }

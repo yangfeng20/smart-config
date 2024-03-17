@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -58,7 +57,7 @@ public class PlaceholderResolver {
 
         String innerKey = text.substring(startInx + prefix.length(), endInx);
         String placeholderValue = keyResolver.apply(innerKey);
-        if (Objects.equals(placeholderValue, prefix + innerKey + suffix)) {
+        if (placeholderValue == null) {
             return text;
         }
 

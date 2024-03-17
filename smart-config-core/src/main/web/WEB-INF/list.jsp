@@ -144,7 +144,7 @@
 
                     setTimeout(() => {
                         location.reload()
-                    }, 2000);
+                    }, 100);
                 } else {
                     const successMessage = document.getElementById('successMessage');
                     response.text().then(result => {
@@ -161,7 +161,7 @@
             setTimeout(() => {
                 const successMessage = document.getElementById('successMessage');
                 successMessage.style.display = 'none';
-            }, 2000);
+            }, 100);
         });
     }
 
@@ -229,7 +229,7 @@
 
                     setTimeout(() => {
                         location.reload()
-                    }, 2000)
+                    }, 100)
                 } else {
                     document.getElementById('value').value = ''
                     const successMessage = document.getElementById('successMessage');
@@ -250,7 +250,7 @@
             setTimeout(() => {
                 const successMessage = document.getElementById('successMessage');
                 successMessage.style.display = 'none';
-            }, 2000);
+            }, 100);
         });
     }
 
