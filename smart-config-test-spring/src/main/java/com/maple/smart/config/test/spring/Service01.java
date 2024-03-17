@@ -21,6 +21,9 @@ import java.util.List;
 @Service
 public class Service01 {
 
+    @Value("${aa:true}")
+    private boolean aa;
+
     @Value("${aaa:111-${ccc}}")
     private String val1;
 
@@ -30,7 +33,7 @@ public class Service01 {
     @Value("${ccc:ddd}")
     private String val3;
 
-    @JsonValue("${list:[1,2,3]}")
+    @JsonValue("${list:[]}")
     public List<Integer> list;
 
     @JsonValue("${obj:{\"key\":\"11111\",\"value\":\"222\",\"desc\":\"333\",\"status\":444,\"durable\":false,\"createDate\":\"2022-10-21 08:45:31\",\"updateDate\":\"2024-05-22 06:05:36\"}}")

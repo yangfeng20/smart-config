@@ -189,6 +189,10 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                 return configValue;
             }
 
+            if (Boolean.class.isAssignableFrom(fieldType) || boolean.class.isAssignableFrom(fieldType)) {
+                return Boolean.parseBoolean(configValue);
+            }
+
             if (fieldType.equals(Integer.class) || fieldType.equals(int.class)) {
                 return Integer.parseInt(configValue);
             } else if (fieldType.equals(Long.class) || fieldType.equals(long.class)) {
@@ -203,9 +207,15 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                 return new BigDecimal(configValue);
             } else if (fieldType.equals(BigInteger.class)) {
                 return new BigInteger(configValue);
-            } else {
-                throw new IllegalArgumentException("Unsupported Number type: " + fieldType.getName());
             }
+
+            if (JSON.isValid(configValue)) {
+                throw new SmartConfigApplicationException("@Value or @SmartValue not support json,please use @JsonValue");
+            }
+
+            // 错误提示更加清晰，使用@Value，来进行json的
+            throw new SmartConfigApplicationException("Unsupported type: " + fieldType.getName() + " for 【 "
+                    + field.getDeclaringClass() + "." + field.getName() + " 】");
         }
 
         if (field.isAnnotationPresent(JsonValue.class)) {
