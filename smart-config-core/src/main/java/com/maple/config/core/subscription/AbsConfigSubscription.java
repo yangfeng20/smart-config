@@ -83,6 +83,10 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             this.propertyInject(configEntity, configSubscriberMap.get(configEntity.getKey()));
             configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
         });
+
+        configListeners.forEach(configListener -> {
+            configListener.onChange(configEntityList);
+        });
     }
 
     @Override
@@ -119,7 +123,6 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
         if (configListeners.contains(configListener)) {
             return;
         }
-        configListener.setConfigSubscription(this);
         configListeners.add(configListener);
     }
 

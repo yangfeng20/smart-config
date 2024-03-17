@@ -15,10 +15,6 @@ public interface ConfigRepository {
 
     boolean addConfig(ConfigEntity configEntity);
 
-    boolean updateConfig(ConfigEntity configEntity);
-
-    ConfigEntity getConfigEntity(String key);
-
     String getConfig(String key);
 
     Collection<ConfigEntity> configList();

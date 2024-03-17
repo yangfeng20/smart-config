@@ -1,6 +1,5 @@
 package com.maple.config.core.boot;
 
-import com.maple.config.core.inject.PropertyInject;
 import com.maple.config.core.listener.ConfigListener;
 import com.maple.config.core.loader.ConfigLoader;
 import com.maple.config.core.repository.ConfigRepository;
@@ -25,17 +24,27 @@ public class SpringConfigBootstrap extends AbsConfigBootstrap {
     public void loaderSpiImpl() {
 
         // 配置加载器
-        configLoaderList.addAll(SpringFactoriesLoader.loadFactories(ConfigLoader.class, LocalConfigBootstrap.class.getClassLoader()));
+        SpringFactoriesLoader.loadFactories(ConfigLoader.class, LocalConfigBootstrap.class.getClassLoader())
+                .forEach(configLoader -> {
+                    configLoader.setConfigInferDesc(descInfer);
+                    configLoaderList.add(configLoader);
+                });
 
         // 配置仓库
-        configRepository = SpringFactoriesLoader.loadFactories(ConfigRepository.class, LocalConfigBootstrap.class.getClassLoader()).get(0);
+        SpringFactoriesLoader.loadFactories(ConfigRepository.class, LocalConfigBootstrap.class.getClassLoader())
+                .forEach(configRepository -> this.configRepository = configRepository);
 
         // 配置订阅者
-        configSubscription = SpringFactoriesLoader.loadFactories(ConfigSubscription.class, LocalConfigBootstrap.class.getClassLoader()).get(0);
-        this.configRepository.setSubscription(configSubscription);
+        SpringFactoriesLoader.loadFactories(ConfigSubscription.class, LocalConfigBootstrap.class.getClassLoader()).forEach(configSubscription -> {
+            this.configSubscription = configSubscription;
+            this.configRepository.setSubscription(configSubscription);
+        });
 
         // 配置监听者
         SpringFactoriesLoader.loadFactories(ConfigListener.class, LocalConfigBootstrap.class.getClassLoader())
-                .forEach(configListener -> configSubscription.addListener(configListener));
+                .forEach(configListener -> {
+                    configListener.setConfigSubscription(this.configSubscription);
+                    configSubscription.addListener(configListener);
+                });
     }
 }

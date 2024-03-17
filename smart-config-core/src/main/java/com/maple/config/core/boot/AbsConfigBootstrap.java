@@ -6,7 +6,6 @@ import com.maple.config.core.loader.ConfigLoader;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.repository.ConfigRepository;
 import com.maple.config.core.subscription.ConfigSubscription;
-import com.maple.config.core.subscription.LocalConfigSubscription;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -40,6 +39,20 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
      */
     protected final List<String> packagePathList;
 
+    /**
+     *
+     */
+    protected boolean started;
+
+
+    @Getter
+    protected ConfigRepository configRepository;
+
+    @Getter
+    protected ConfigSubscription configSubscription;
+
+    protected final List<ConfigLoader> configLoaderList = new ArrayList<>();
+
     public AbsConfigBootstrap(boolean descInfer, int webUiPort, String localConfigPath, List<String> packagePathList) {
         this.descInfer = descInfer;
         this.webUiPort = webUiPort;
@@ -47,38 +60,29 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
         this.packagePathList = packagePathList;
     }
 
-    protected ConfigRepository configRepository;
 
-    protected final List<ConfigLoader> configLoaderList = new ArrayList<>();
-
-    @Getter
-    protected ConfigSubscription configSubscription = new LocalConfigSubscription();
+    public abstract void loaderSpiImpl();
 
     public void init() {
         loaderSpiImpl();
         loaderConfigToRepository();
     }
 
-    public abstract void loaderSpiImpl();
-
-    public void loaderConfigToRepository() {
-        for (ConfigLoader configLoader : configLoaderList) {
-            configLoader.setConfigInferDesc(descInfer);
-            Collection<ConfigEntity> configEntityList = configLoader.loaderConfig(localConfigPath);
-            configRepository.loader(configEntityList);
-        }
-    }
-
-    @Override
-    public ConfigRepository getConfigRepository() {
-        return configRepository;
-    }
-
     @Override
     public void refreshConfig() {
         configRepository.refresh();
 
-        startWebUi();
+        if (!started) {
+            startWebUi();
+            started = true;
+        }
+    }
+
+    public void loaderConfigToRepository() {
+        for (ConfigLoader configLoader : configLoaderList) {
+            Collection<ConfigEntity> configEntityList = configLoader.loaderConfig(localConfigPath);
+            configRepository.loader(configEntityList);
+        }
     }
 
     public void startWebUi() {

@@ -59,16 +59,6 @@ public abstract class AbsConfigRepository implements ConfigRepository {
     }
 
     @Override
-    public boolean updateConfig(ConfigEntity configEntity) {
-        return false;
-    }
-
-    @Override
-    public ConfigEntity getConfigEntity(String key) {
-        return configEntityMap.get(key);
-    }
-
-    @Override
     public String getConfig(String key) {
         return configEntityMap.getOrDefault(key, new ConfigEntity()).getValue();
     }

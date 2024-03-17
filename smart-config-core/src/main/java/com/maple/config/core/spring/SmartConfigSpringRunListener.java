@@ -40,17 +40,15 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
 
     @Override
     public void starting() {
-        System.out.println("SmartConfigSpringRunListener.starting");
+
     }
 
     @Override
     public void environmentPrepared(ConfigurableEnvironment environment) {
-        System.out.println("environment = " + environment);
     }
 
     @Override
     public void contextPrepared(ConfigurableApplicationContext context) {
-        System.out.println("context = " + context);
         if (!enableSmartConfig) {
             return;
         }
@@ -62,8 +60,6 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
 
     @Override
     public void contextLoaded(ConfigurableApplicationContext context) {
-        System.out.println("context = " + context);
-
     }
 
     @Override
@@ -77,12 +73,11 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
 
     @Override
     public void running(ConfigurableApplicationContext context) {
-        System.out.println("context = " + context);
 
     }
 
     @Override
     public void failed(ConfigurableApplicationContext context, Throwable exception) {
-        System.out.println("exception = " + exception);
+
     }
 }

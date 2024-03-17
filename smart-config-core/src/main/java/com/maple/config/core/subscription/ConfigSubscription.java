@@ -1,11 +1,9 @@
 package com.maple.config.core.subscription;
 
-import com.maple.config.core.inject.PropertyInject;
 import com.maple.config.core.listener.ConfigListener;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.repository.ConfigRepository;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 /**
@@ -16,8 +14,6 @@ import java.util.List;
 
 public interface ConfigSubscription {
 
-
-
     void addSubscription(Object targetObj);
 
     void addSubscription(Class<?> clazz);
@@ -27,7 +23,6 @@ public interface ConfigSubscription {
     void refresh(ConfigRepository configRepository);
 
     void subscribe(List<ConfigEntity> configEntityList);
-
 
     List<Object> getFocusObjListByKey(String key);
 
