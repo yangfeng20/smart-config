@@ -28,18 +28,8 @@ public class EditConfigServlet extends AbsConfigHttpServlet {
             throw new IllegalArgumentException();
         }
 
-        if (isCreate) {
-            ConfigEntity configEntity = new ConfigEntity(key, value, ReleaseStatusEnum.NOT_RELEASE.getCode());
-            configEntity.setCreateDate(new Date());
-            configRepository.addConfig(configEntity);
-            return;
-        }
-
-        if (configRepository.containsKey(key)) {
-            ConfigEntity configEntity = configRepository.getConfigEntity(key);
-            configEntity.setValue(value);
-            configEntity.setUpdateDate(new Date());
-            configEntity.setStatus(ReleaseStatusEnum.NOT_RELEASE.getCode());
-        }
+        ConfigEntity configEntity = new ConfigEntity(key, value, ReleaseStatusEnum.NOT_RELEASE.getCode());
+        configEntity.setCreateDate(new Date());
+        configRepository.addConfig(configEntity);
     }
 }

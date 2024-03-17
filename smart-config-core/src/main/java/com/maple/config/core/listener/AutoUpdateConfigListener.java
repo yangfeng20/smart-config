@@ -109,9 +109,7 @@ public class AutoUpdateConfigListener implements ConfigListener {
 
     @Override
     public void onChange(Collection<ConfigEntity> changeConfigEntityList) {
-        for (ConfigEntity configEntity : changeConfigEntityList) {
-
-        }
+        System.out.println(this + " - onChange changeConfigEntityList = " + changeConfigEntityList);
 
     }
 }

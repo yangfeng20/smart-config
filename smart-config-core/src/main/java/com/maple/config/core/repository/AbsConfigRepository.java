@@ -6,10 +6,7 @@ import com.maple.config.core.subscription.ConfigSubscription;
 import com.maple.config.core.utils.PlaceholderResolver;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -26,7 +23,7 @@ public abstract class AbsConfigRepository implements ConfigRepository {
 
     protected ConfigSubscription configSubscription;
 
-    protected List<String> waitReleaseKeyList;
+    protected List<String> waitReleaseKeyList = new ArrayList<>();
 
     @Override
     public void setSubscription(ConfigSubscription configSubscription) {
@@ -48,7 +45,16 @@ public abstract class AbsConfigRepository implements ConfigRepository {
         }
 
         boolean containsKey = configEntityMap.containsKey(configEntity.getKey());
-        configEntityMap.put(configEntity.getKey(), configEntity);
+        configEntityMap.compute(configEntity.getKey(), (configKey, oldConfigEntity) -> {
+            if (oldConfigEntity == null) {
+                return configEntity;
+            }
+            oldConfigEntity.setValue(configEntity.getValue());
+            oldConfigEntity.setStatus(configEntity.getStatus());
+            oldConfigEntity.setUpdateDate(new Date());
+            return oldConfigEntity;
+        });
+        waitReleaseKeyList.add(configEntity.getKey());
         return containsKey;
     }
 

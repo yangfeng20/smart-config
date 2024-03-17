@@ -3,6 +3,7 @@ package com.maple.config.core.subscription;
 import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.listener.ConfigListener;
 import com.maple.config.core.model.ConfigEntity;
+import com.maple.config.core.model.ReleaseStatusEnum;
 import com.maple.config.core.repository.ConfigRepository;
 import com.maple.config.core.utils.ClassUtils;
 import com.maple.config.core.utils.Lists;
@@ -71,7 +72,14 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
 
     @Override
     public void subscribe(List<ConfigEntity> configEntityList) {
-        configListeners.forEach(configListener -> configListener.onChange(configEntityList));
+        for (ConfigListener configListener : configListeners) {
+            configEntityList.forEach(configEntity -> {
+                // todo 为抛出异常，修改时间
+                configListener.propertyInject(configEntity, configSubscriberMap.get(configEntity.getKey()));
+                configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
+            });
+            configListener.onChange(configEntityList);
+        }
     }
 
     @Override

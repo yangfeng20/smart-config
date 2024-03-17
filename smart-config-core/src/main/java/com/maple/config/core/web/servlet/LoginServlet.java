@@ -26,8 +26,8 @@ public class LoginServlet extends AbsConfigHttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        Object username = configRepository.getConfig("username");
-        Object pwd = configRepository.getConfig("password");
+        Object username = configRepository.getConfig("smart.username");
+        Object pwd = configRepository.getConfig("smart.password");
 
         String usernameParam = req.getParameter("username");
         String pwdParam = req.getParameter("password");
