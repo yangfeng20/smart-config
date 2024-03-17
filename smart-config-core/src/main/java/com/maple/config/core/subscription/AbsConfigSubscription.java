@@ -112,6 +112,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             // 字段上的配置key在配置文件中找不到时，给出空配置实体【字段注解上可能有默认值】
             ConfigEntity configEntity = Optional.ofNullable(configEntityMap.get(configKey)).orElse(new ConfigEntity(configKey));
 
+            // todo 启动刷新时过滤@Value
             this.propertyInject(configEntity, focusFieldList);
         }
     }
@@ -151,7 +152,9 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                 Object fieldValue = resolveValue(field, configEntity.getValue());
                 List<Object> fieldTargetObjList = getFocusObjListByKey(configEntity.getKey());
                 for (Object fieldTargetObj : fieldTargetObjList) {
-                    field.set(fieldTargetObj, fieldValue);
+                    if (fieldTargetObj != null && field.getDeclaringClass().equals(fieldTargetObj.getClass())) {
+                        field.set(fieldTargetObj, fieldValue);
+                    }
                 }
             } catch (Exception e) {
                 throw new SmartConfigApplicationException("解析value异常", e);
