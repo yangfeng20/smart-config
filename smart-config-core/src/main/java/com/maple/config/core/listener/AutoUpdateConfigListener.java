@@ -6,7 +6,6 @@ import com.maple.config.core.annotation.SmartValue;
 import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.repository.ConfigRepository;
-import com.maple.config.core.spring.SmartConfigSpringContext;
 import com.maple.config.core.subscription.ConfigSubscription;
 import com.maple.config.core.utils.ClassUtils;
 
@@ -42,7 +41,7 @@ public class AutoUpdateConfigListener implements ConfigListener {
     }
 
     protected String resolveFieldDefaultValue(Field field) {
-        ConfigRepository configRepository = SmartConfigSpringContext.getBean(ConfigRepository.class);
+        ConfigRepository configRepository = configSubscription.getConfigRepository();
         String configValue = ClassUtils.resolveAnnotation(field.getAnnotation(SmartValue.class), configRepository::getConfig).getValue();
         return configValue != null ? configValue : ClassUtils.resolveAnnotation(field.getAnnotation(JsonValue.class),
                 configRepository::getConfig).getValue();

@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 
 public abstract class AbsConfigSubscription implements ConfigSubscription {
 
+    protected ConfigRepository configRepository;
+
     protected Map<String, List<Field>> configSubscriberMap = new HashMap<>(16);
 
     protected Map<String, List<Object>> configSubscriberObjMap = new HashMap<>(16);
@@ -29,10 +31,9 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
 
     @Override
     public void addSubscription(Class<?> clazz) {
-        // todo 是否初始化赋值，@SmartValue @JsonValue  不需要：@Value
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
-            this.addSubscription(field);
+            this.addSubscription(field, null);
         }
     }
 
@@ -79,7 +80,15 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
     }
 
     @Override
+    public ConfigRepository getConfigRepository() {
+        return configRepository;
+    }
+
+    @Override
     public void refresh(ConfigRepository configRepository) {
+        if (this.configRepository == null) {
+            this.configRepository = configRepository;
+        }
         Map<String, ConfigEntity> configEntityMap = configRepository.resolvedPlaceholdersConfigList()
                 .stream()
                 .collect(Collectors.toMap(ConfigEntity::getKey, Function.identity()));
@@ -110,7 +119,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
 
         String configKey = doParseKey(field);
         if (configKey == null || configKey.isEmpty()) {
-            throw new SmartConfigApplicationException(field.getClass() + "." + field.getName() + "configKey is null or empty");
+            throw new SmartConfigApplicationException(field.getClass() + "." + field.getName() + " configKey is null or empty");
         }
         return configKey;
     }

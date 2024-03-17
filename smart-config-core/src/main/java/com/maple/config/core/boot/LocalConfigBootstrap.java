@@ -28,6 +28,8 @@ public class LocalConfigBootstrap extends AbsConfigBootstrap {
     public void init() {
         super.init();
         scanClassAndSubscription();
+
+        this.refreshConfig();
     }
 
     private void scanClassAndSubscription() {

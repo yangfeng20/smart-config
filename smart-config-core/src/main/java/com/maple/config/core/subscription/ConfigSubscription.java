@@ -31,4 +31,6 @@ public interface ConfigSubscription {
 
 
     List<Object> getFocusObjListByKey(String key);
+
+    ConfigRepository getConfigRepository();
 }
