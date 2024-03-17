@@ -1,6 +1,10 @@
 package com.maple.config.core.subscription;
 
+import com.alibaba.fastjson.JSON;
+import com.maple.config.core.annotation.JsonValue;
+import com.maple.config.core.annotation.SmartValue;
 import com.maple.config.core.exp.SmartConfigApplicationException;
+import com.maple.config.core.inject.PropertyInject;
 import com.maple.config.core.listener.ConfigListener;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.model.ReleaseStatusEnum;
@@ -10,6 +14,9 @@ import com.maple.config.core.utils.Lists;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -20,15 +27,16 @@ import java.util.stream.Collectors;
  * Description:
  */
 
-public abstract class AbsConfigSubscription implements ConfigSubscription {
+public abstract class AbsConfigSubscription implements ConfigSubscription, PropertyInject {
 
     protected ConfigRepository configRepository;
+
+    protected List<ConfigListener> configListeners = new ArrayList<>();
 
     protected Map<String, List<Field>> configSubscriberMap = new HashMap<>(16);
 
     protected Map<String, List<Object>> configSubscriberObjMap = new HashMap<>(16);
 
-    protected List<ConfigListener> configListeners = new ArrayList<>();
 
     @Override
     public void addSubscription(Class<?> clazz) {
@@ -47,8 +55,6 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
         }
     }
 
-
-    @Override
     public void addSubscription(Field field, Object targetObj) {
         if (!focus(field)) {
             return;
@@ -72,14 +78,11 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
 
     @Override
     public void subscribe(List<ConfigEntity> configEntityList) {
-        for (ConfigListener configListener : configListeners) {
-            configEntityList.forEach(configEntity -> {
-                // todo 为抛出异常，修改时间
-                configListener.propertyInject(configEntity, configSubscriberMap.get(configEntity.getKey()));
-                configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
-            });
-            configListener.onChange(configEntityList);
-        }
+        configEntityList.forEach(configEntity -> {
+            // todo 为抛出异常，修改时间
+            this.propertyInject(configEntity, configSubscriberMap.get(configEntity.getKey()));
+            configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
+        });
     }
 
     @Override
@@ -107,7 +110,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
             // 字段上的配置key在配置文件中找不到时，给出空配置实体【字段注解上可能有默认值】
             ConfigEntity configEntity = Optional.ofNullable(configEntityMap.get(configKey)).orElse(new ConfigEntity(configKey));
 
-            configListeners.forEach(configListener -> configListener.propertyInject(configEntity, focusFieldList));
+            this.propertyInject(configEntity, focusFieldList);
         }
     }
 
@@ -136,5 +139,76 @@ public abstract class AbsConfigSubscription implements ConfigSubscription {
 
     protected String resolveAnnotation(Annotation annotation) {
         return ClassUtils.resolveAnnotationKey(annotation);
+    }
+
+
+    @Override
+    public void propertyInject(ConfigEntity configEntity, List<Field> fieldList) {
+        fieldList.forEach(field -> {
+            field.setAccessible(true);
+            try {
+                Object fieldValue = resolveValue(field, configEntity.getValue());
+                List<Object> fieldTargetObjList = getFocusObjListByKey(configEntity.getKey());
+                for (Object fieldTargetObj : fieldTargetObjList) {
+                    field.set(fieldTargetObj, fieldValue);
+                }
+            } catch (IllegalAccessException e) {
+                // todo 日志
+                e.printStackTrace();
+            }
+        });
+    }
+
+    protected boolean isSimpleTypeAnnotation(Field field) {
+        return field.isAnnotationPresent(SmartValue.class);
+    }
+
+    protected String resolveFieldDefaultValue(Field field) {
+        String configValue = ClassUtils.resolveAnnotation(field.getAnnotation(SmartValue.class), configRepository::getConfig).getValue();
+        return configValue != null ? configValue : ClassUtils.resolveAnnotation(field.getAnnotation(JsonValue.class),
+                configRepository::getConfig).getValue();
+    }
+
+    protected Object resolveValue(Field field, String configValue) {
+        // 配置文件中当前字段key没有对应值，查看字段的直接上是否有默认值
+        if (configValue == null) {
+            configValue = resolveFieldDefaultValue(field);
+        }
+        if (configValue == null) {
+            throw new SmartConfigApplicationException("todo debug 空数据");
+        }
+
+        if (isSimpleTypeAnnotation(field)) {
+            Class<?> fieldType = field.getType();
+
+            if (String.class.isAssignableFrom(fieldType)) {
+                return configValue;
+            }
+
+            if (fieldType.equals(Integer.class) || fieldType.equals(int.class)) {
+                return Integer.parseInt(configValue);
+            } else if (fieldType.equals(Long.class) || fieldType.equals(long.class)) {
+                return Long.parseLong(configValue);
+            } else if (fieldType.equals(Double.class) || fieldType.equals(double.class)) {
+                return Double.parseDouble(configValue);
+            } else if (fieldType.equals(Float.class) || fieldType.equals(float.class)) {
+                return Float.parseFloat(configValue);
+            } else if (fieldType.equals(Short.class) || fieldType.equals(short.class)) {
+                return Short.parseShort(configValue);
+            } else if (fieldType.equals(BigDecimal.class)) {
+                return new BigDecimal(configValue);
+            } else if (fieldType.equals(BigInteger.class)) {
+                return new BigInteger(configValue);
+            } else {
+                throw new IllegalArgumentException("Unsupported Number type: " + fieldType.getName());
+            }
+        }
+
+        if (field.isAnnotationPresent(JsonValue.class)) {
+            Type fieldGenericType = field.getGenericType();
+            return JSON.parseObject(configValue, fieldGenericType);
+        }
+
+        throw new SmartConfigApplicationException("debug error");
     }
 }

@@ -1,1 +1,1 @@
-com.maple.config.core.listener.AutoUpdateConfigListener
+com.maple.config.core.listener.DefaultConfigListener

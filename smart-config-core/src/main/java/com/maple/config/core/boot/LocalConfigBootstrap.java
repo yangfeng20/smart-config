@@ -1,5 +1,6 @@
 package com.maple.config.core.boot;
 
+import com.maple.config.core.inject.PropertyInject;
 import com.maple.config.core.listener.ConfigListener;
 import com.maple.config.core.loader.ConfigLoader;
 import com.maple.config.core.repository.ConfigRepository;

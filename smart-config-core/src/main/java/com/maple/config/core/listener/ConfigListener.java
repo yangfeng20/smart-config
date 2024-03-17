@@ -3,9 +3,7 @@ package com.maple.config.core.listener;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.subscription.ConfigSubscription;
 
-import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author maple
@@ -15,12 +13,7 @@ import java.util.List;
 
 public interface ConfigListener {
 
-    void propertyInject(ConfigEntity configEntity, List<Field> fieldList);
-
-
     void onChange(Collection<ConfigEntity> changeConfigEntityList);
-
-    List<Object> getObjectListByKey(String configKey);
 
     void setConfigSubscription(ConfigSubscription configSubscription);
 }
