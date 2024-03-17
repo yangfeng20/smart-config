@@ -131,7 +131,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
 
         String configKey = doParseKey(field);
         if (configKey == null || configKey.isEmpty()) {
-            throw new SmartConfigApplicationException(field.getClass() + "." + field.getName() + " configKey is null or empty");
+            throw new SmartConfigApplicationException(field.getDeclaringClass() + "." + field.getName() + " configKey is null or empty");
         }
         return configKey;
     }
@@ -153,9 +153,8 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                 for (Object fieldTargetObj : fieldTargetObjList) {
                     field.set(fieldTargetObj, fieldValue);
                 }
-            } catch (IllegalAccessException e) {
-                // todo 日志
-                throw new SmartConfigApplicationException(e);
+            } catch (Exception e) {
+                throw new SmartConfigApplicationException("解析value异常", e);
             }
         });
     }
@@ -176,7 +175,8 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             configValue = resolveFieldDefaultValue(field);
         }
         if (configValue == null) {
-            throw new SmartConfigApplicationException("todo debug 空数据");
+            throw new SmartConfigApplicationException(field.getDeclaringClass() + "." + field.getName()
+                    + " configValue cannot be null without a default value");
         }
 
         if (isSimpleTypeAnnotation(field)) {

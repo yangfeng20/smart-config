@@ -79,7 +79,7 @@ public class ClassUtils {
         }
         Pair<Integer, Integer> indexPair = existPlaceholderAndIndexPair.getValue();
         String notExistPlaceholderText = annotationValue.substring(indexPair.getKey(), indexPair.getValue());
-        String[] keyAndDefaultValArr = notExistPlaceholderText.split(":");
+        String[] keyAndDefaultValArr = notExistPlaceholderText.split(":", 2);
         if (keyAndDefaultValArr.length == 1) {
             return new Pair<>(keyAndDefaultValArr[0], null);
         }

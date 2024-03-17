@@ -90,6 +90,12 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
             Collection<ConfigEntity> configEntityList = configLoader.loaderConfig(localConfigPath);
             configRepository.loader(configEntityList);
         }
+
+        String username = configRepository.getConfig("smart.username");
+        String password = configRepository.getConfig("smart.password");
+        if (username == null || password == null) {
+            throw new SmartConfigApplicationException("Smart-config:配置文件中【smart.username】和【smart.password】不能为空");
+        }
     }
 
     public void startWebUi() {

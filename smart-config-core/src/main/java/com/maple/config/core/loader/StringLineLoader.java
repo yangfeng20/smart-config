@@ -55,7 +55,7 @@ public class StringLineLoader extends AbsConfigLoader {
                 continue;
             }
 
-            String[] strArr = lineStr.split("=");
+            String[] strArr = lineStr.split("=", 2);
             String key = strArr[0].trim();
             String value;
             // 配置文件不规范，只有=号，没有后面的值

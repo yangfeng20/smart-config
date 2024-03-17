@@ -21,10 +21,10 @@ import java.util.List;
 @Service
 public class Service01 {
 
-    @Value("${aaa:111-${bbb}}")
+    @Value("${aaa:111-${ccc}}")
     private String val1;
 
-    @SmartValue("${bbb:222}")
+    @SmartValue("${bbb:222-${ccc}}")
     private String val2;
 
     @Value("${ccc:ddd}")
@@ -33,6 +33,9 @@ public class Service01 {
     @JsonValue("${list:[1,2,3]}")
     public List<Integer> list;
 
+    @JsonValue("${obj:{\"key\":\"11111\",\"value\":\"222\",\"desc\":\"333\",\"status\":444,\"durable\":false,\"createDate\":\"2022-10-21 08:45:31\",\"updateDate\":\"2024-05-22 06:05:36\"}}")
+    public Object obj;
+
 
     @Transactional(rollbackFor = Exception.class)
     public void test01() {
@@ -40,6 +43,7 @@ public class Service01 {
         System.out.println("val2 = " + val2);
         System.out.println("val3 = " + val3);
         System.out.println("list = " + list);
+        System.out.println("obj = " + obj);
     }
 
 
