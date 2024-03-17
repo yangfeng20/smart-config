@@ -6,9 +6,10 @@ import com.maple.config.core.subscription.ConfigSubscription;
 import java.util.Collection;
 
 /**
+ * 配置变更监听，用于实现自定义逻辑
+ *
  * @author maple
- * Created Date: 2024/3/7 21:55
- * Description:
+ * @since 2024/3/7 21:55
  */
 
 public interface ConfigListener {

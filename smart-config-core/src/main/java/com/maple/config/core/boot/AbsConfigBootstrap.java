@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * @author maple
- * Created Date: 2024/3/13 22:28
+ * @since 2024/3/13 22:28
  * Description:
  */
 
@@ -61,6 +61,10 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
     }
 
 
+    /**
+     * 通过spi加载实现
+     * spring or java spi
+     */
     public abstract void loaderSpiImpl();
 
     public void init() {
@@ -78,6 +82,9 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
         }
     }
 
+    /**
+     * 加载配置到存储库
+     */
     public void loaderConfigToRepository() {
         for (ConfigLoader configLoader : configLoaderList) {
             Collection<ConfigEntity> configEntityList = configLoader.loaderConfig(localConfigPath);

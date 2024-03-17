@@ -1,5 +1,6 @@
 package com.maple.config.core.boot;
 
+import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.listener.ConfigListener;
 import com.maple.config.core.loader.ConfigLoader;
 import com.maple.config.core.repository.ConfigRepository;
@@ -13,7 +14,7 @@ import java.util.ServiceLoader;
 
 /**
  * @author maple
- * Created Date: 2024/3/7 22:11
+ * @since 2024/3/7 22:11
  * Description:
  */
 
@@ -57,6 +58,12 @@ public class LocalConfigBootstrap extends AbsConfigBootstrap {
         });
     }
 
+    /**
+     * 扫描类和订阅
+     * 非spring应用需要自己手动扫描含有 {@code @SmartValue @JsonValue} 注解的类路径
+     * <p/>
+     * 找到这些类并添加订阅
+     */
     private void scanClassAndSubscription() {
         // 扫描类并添加订阅
         List<Class<?>> scanClass = scanClass();
@@ -76,10 +83,9 @@ public class LocalConfigBootstrap extends AbsConfigBootstrap {
                 List<Class<?>> classes = ClassUtils.getClasses(packagePath);
                 scannerResult.addAll(classes);
             } catch (ClassNotFoundException | IOException e) {
-                throw new RuntimeException(e);
+                throw new SmartConfigApplicationException("扫描类失败", e);
             }
         }
-
         return scannerResult;
     }
 }

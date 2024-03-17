@@ -5,14 +5,20 @@ import com.maple.config.core.model.ConfigEntity;
 import java.util.Collection;
 
 /**
+ * 配置加载器
+ *
  * @author maple
- * Created Date: 2024/3/7 21:28
- * Description:
+ * @since 2024/3/7 21:28
  */
 
 public interface ConfigLoader {
 
     Collection<ConfigEntity> loaderConfig(String path);
 
+    /**
+     * 是否开启配置描述解析
+     *
+     * @param openConfigInferDesc 是否开启配置描述推断
+     */
     void setConfigInferDesc(boolean openConfigInferDesc);
 }

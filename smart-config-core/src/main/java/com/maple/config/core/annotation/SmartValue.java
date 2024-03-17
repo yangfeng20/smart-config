@@ -3,9 +3,10 @@ package com.maple.config.core.annotation;
 import java.lang.annotation.*;
 
 /**
+ * 作用同 spring {@code @Value}
  *
  * @author maple
- * @date 2023/12/01
+ * @since 2023/12/01
  */
 
 

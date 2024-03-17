@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author maple
- * Created Date: 2024/3/7 21:50
+ * @since 2024/3/7 21:50
  * Description:
  */
 
@@ -84,9 +84,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
         });
 
-        configListeners.forEach(configListener -> {
-            configListener.onChange(configEntityList);
-        });
+        configListeners.forEach(configListener -> configListener.onChange(configEntityList));
     }
 
     @Override

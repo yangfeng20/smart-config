@@ -1,14 +1,16 @@
 package com.maple.config.core.model;
 
+import lombok.Data;
+
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * @author yangfeng
- * @date : 2023/12/6 12:07
+ * @since : 2023/12/6 12:07
  * desc:
  */
 
+@Data
 public class ConfigVO {
 
     private String key;
@@ -44,61 +46,5 @@ public class ConfigVO {
             configVO.setUpdateDate(sdf.format(configEntity.getUpdateDate()));
         }
         return configVO;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getDurable() {
-        return durable;
-    }
-
-    public void setDurable(String durable) {
-        this.durable = durable;
-    }
-
-    public String getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(String createDate) {
-        this.createDate = createDate;
-    }
-
-    public String getUpdateDate() {
-        return updateDate;
-    }
-
-    public void setUpdateDate(String updateDate) {
-        this.updateDate = updateDate;
     }
 }

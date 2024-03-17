@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 
 /**
  * @author maple
- * Created Date: 2023/12/19 11:12
+ * @since 2023/12/19 11:12
  * Description:
  */
 @Target({ElementType.TYPE})

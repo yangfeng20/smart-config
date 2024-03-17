@@ -1,22 +1,18 @@
 package com.maple.config.core.web.servlet;
 
-import com.maple.config.core.api.SmartConfig;
-import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.model.ConfigVO;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * @author yangfeng
- * @date : 2023/12/4 16:22
+ * @since : 2023/12/4 16:22
  * desc:
  */
 public class ListConfigServlet extends AbsConfigHttpServlet {

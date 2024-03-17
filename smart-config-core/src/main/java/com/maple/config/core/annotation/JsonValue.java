@@ -6,9 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 作用同 {@code @ApolloJson} json版本的@Value
  *
  * @author maple
- * @date 2023/12/01
+ * @since 2023/12/01
  */
 
 

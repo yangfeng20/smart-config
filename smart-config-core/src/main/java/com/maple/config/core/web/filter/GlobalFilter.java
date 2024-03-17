@@ -5,11 +5,8 @@ import com.maple.config.core.exp.SmartConfigApplicationException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collections;
-import java.util.List;
 
 public class GlobalFilter implements Filter {
     @Override

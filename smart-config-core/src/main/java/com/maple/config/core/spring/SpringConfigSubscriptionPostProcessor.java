@@ -9,7 +9,7 @@ import org.springframework.context.ApplicationContextAware;
 
 /**
  * @author maple
- * Created Date: 2023/12/17 14:02
+ * @since 2023/12/17 14:02
  * Description:
  */
 
@@ -27,6 +27,7 @@ public class SpringConfigSubscriptionPostProcessor implements BeanPostProcessor,
         SpringConfigBootstrap springConfigBootstrap = applicationContext.getBean(SpringConfigBootstrap.class);
         ConfigSubscription configSubscription = springConfigBootstrap.getConfigSubscription();
 
+        // 订阅当前bean满足条件的字段，并构建key beanName映射关系
         configSubscription.addSubscription(bean);
         return bean;
     }
