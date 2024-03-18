@@ -66,4 +66,6 @@ public interface ConfigSubscription {
      * @return {@link ConfigRepository}
      */
     ConfigRepository getConfigRepository();
+
+    void setConfigRepository(ConfigRepository configRepository);
 }

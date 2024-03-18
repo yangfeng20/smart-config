@@ -48,6 +48,7 @@ public class LocalConfigBootstrap extends AbsConfigBootstrap {
         // 配置订阅者
         ServiceLoader.load(ConfigSubscription.class).forEach(configSubscription -> {
             this.configSubscription = configSubscription;
+            this.configSubscription.setConfigRepository(this.configRepository);
             this.configRepository.setSubscription(configSubscription);
         });
 

@@ -64,6 +64,11 @@ public abstract class AbsConfigRepository implements ConfigRepository {
     }
 
     @Override
+    public ConfigEntity getConfigEntity(String key) {
+        return configEntityMap.get(key);
+    }
+
+    @Override
     public boolean containsKey(String key) {
         return configEntityMap.containsKey(key);
     }

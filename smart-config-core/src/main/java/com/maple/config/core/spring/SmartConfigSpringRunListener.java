@@ -64,10 +64,10 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
 
     @Override
     public void started(ConfigurableApplicationContext context) {
-        // todo 赋值过程放在beanPostProcess中
         if (!enableSmartConfig) {
             return;
         }
+        // 仅启动webUI
         smartConfigBootstrap.refreshConfig();
 
     }

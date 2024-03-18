@@ -31,6 +31,14 @@ public interface ConfigRepository {
     String getConfig(String key);
 
     /**
+     * 获取配置实体
+     *
+     * @param key key
+     * @return {@link ConfigEntity}
+     */
+    ConfigEntity getConfigEntity(String key);
+
+    /**
      * 配置列表
      *
      * @return {@link Collection}<{@link ConfigEntity}>

@@ -16,4 +16,6 @@ import java.util.List;
 public interface PropertyInject {
 
     void propertyInject(ConfigEntity configEntity, List<Field> fieldList);
+
+    void propertyInject(Object bean);
 }

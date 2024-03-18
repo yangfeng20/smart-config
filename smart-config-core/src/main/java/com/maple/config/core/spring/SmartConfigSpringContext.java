@@ -1,8 +1,13 @@
 package com.maple.config.core.spring;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.PriorityOrdered;
+import org.springframework.core.annotation.Order;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -13,9 +18,9 @@ import java.util.Map;
  * Description:
  */
 
-public class SmartConfigSpringContext implements ApplicationContextAware {
+public class SmartConfigSpringContext implements ApplicationContextAware, BeanFactoryPostProcessor {
 
-    private static ApplicationContext applicationContext;
+    static ApplicationContext applicationContext;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -30,14 +35,14 @@ public class SmartConfigSpringContext implements ApplicationContextAware {
      * @return Bean
      */
     @SuppressWarnings("unchecked")
-    public static  <T> T getBean(String name) {
+    public static <T> T getBean(String name) {
         return (T) applicationContext.getBean(name);
     }
 
     /**
      * 通过class获取Bean
      *
-     * @param <T> Bean类型
+     * @param <T>   Bean类型
      * @param clazz Bean类
      * @return Bean对象
      */
@@ -45,8 +50,14 @@ public class SmartConfigSpringContext implements ApplicationContextAware {
         return applicationContext.getBean(clazz);
     }
 
-    public static Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotation){
+    public static Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotation) {
         return applicationContext.getBeansWithAnnotation(annotation);
     }
 
+
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
+        // 实现BeanFactoryPostProcessor为了先构建出容器对象，随时使用
+        //configurableListableBeanFactory
+    }
 }

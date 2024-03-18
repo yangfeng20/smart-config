@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 /**
@@ -38,6 +39,12 @@ public class Service01 {
 
     @JsonValue("${obj:{\"key\":\"11111\",\"value\":\"222\",\"desc\":\"333\",\"status\":444,\"durable\":false,\"createDate\":\"2022-10-21 08:45:31\",\"updateDate\":\"2024-05-22 06:05:36\"}}")
     public Object obj;
+
+    @PostConstruct
+    private void init() {
+        System.out.println("list.contains(1) = " + list.contains(1));
+        System.out.println("this = " + this);
+    }
 
 
     @Transactional(rollbackFor = Exception.class)

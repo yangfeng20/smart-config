@@ -11,6 +11,9 @@ import com.maple.config.core.model.ReleaseStatusEnum;
 import com.maple.config.core.repository.ConfigRepository;
 import com.maple.config.core.utils.ClassUtils;
 import com.maple.config.core.utils.Lists;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -29,6 +32,8 @@ import java.util.stream.Collectors;
 
 public abstract class AbsConfigSubscription implements ConfigSubscription, PropertyInject {
 
+    @Setter
+    @Getter
     protected ConfigRepository configRepository;
 
     protected List<ConfigListener> configListeners = new ArrayList<>();
@@ -93,15 +98,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
     }
 
     @Override
-    public ConfigRepository getConfigRepository() {
-        return configRepository;
-    }
-
-    @Override
     public void refresh(ConfigRepository configRepository) {
-        if (this.configRepository == null) {
-            this.configRepository = configRepository;
-        }
         Map<String, ConfigEntity> configEntityMap = configRepository.resolvedPlaceholdersConfigList()
                 .stream()
                 .collect(Collectors.toMap(ConfigEntity::getKey, Function.identity()));
@@ -111,8 +108,6 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
 
             // 字段上的配置key在配置文件中找不到时，给出空配置实体【字段注解上可能有默认值】
             ConfigEntity configEntity = Optional.ofNullable(configEntityMap.get(configKey)).orElse(new ConfigEntity(configKey));
-
-            // todo 启动刷新时过滤@Value
             this.propertyInject(configEntity, focusFieldList);
         }
     }
@@ -141,6 +136,19 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
 
     protected String resolveAnnotation(Annotation annotation) {
         return ClassUtils.resolveAnnotationKey(annotation);
+    }
+
+    public void propertyInject(Object bean) {
+        Arrays.stream(bean.getClass().getDeclaredFields())
+                .filter(this::focus)
+                // 过滤@Value；spring赋值
+                .filter(field -> !field.isAnnotationPresent(Value.class))
+                .forEach(field -> {
+                    String configKey = parseKey(field);
+                    ConfigEntity configEntity = Optional.ofNullable(configRepository.getConfigEntity(configKey))
+                            .orElse(new ConfigEntity(configKey));
+                    propertyInject(configEntity, Lists.newArrayList(field));
+                });
     }
 
 

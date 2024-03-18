@@ -37,6 +37,7 @@ public class SpringConfigBootstrap extends AbsConfigBootstrap {
         // 配置订阅者
         SpringFactoriesLoader.loadFactories(ConfigSubscription.class, LocalConfigBootstrap.class.getClassLoader()).forEach(configSubscription -> {
             this.configSubscription = configSubscription;
+            this.configSubscription.setConfigRepository(this.configRepository);
             this.configRepository.setSubscription(configSubscription);
         });
 
@@ -46,5 +47,14 @@ public class SpringConfigBootstrap extends AbsConfigBootstrap {
                     configListener.setConfigSubscription(this.configSubscription);
                     configSubscription.addListener(configListener);
                 });
+    }
+
+    @Override
+    public void refreshConfig() {
+        // spring应用不需要手动刷新（触发字段赋值）；在beanPostProcessor中处理了
+        if (!started) {
+            startWebUi();
+            started = true;
+        }
     }
 }

@@ -1,6 +1,6 @@
 package com.maple.config.core.annotation;
 
-import com.maple.config.core.spring.SpringConfigSubscriptionPostProcessor;
+import com.maple.config.core.spring.PropertySubscriptionInjectBeanPostProcessor;
 import com.maple.config.core.spring.SmartConfigSpringContext;
 import org.springframework.context.annotation.Import;
 
@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Import({SmartConfigSpringContext.class, SpringConfigSubscriptionPostProcessor.class})
+@Import({SmartConfigSpringContext.class, PropertySubscriptionInjectBeanPostProcessor.class})
 public @interface EnableSmartConfig {
 
     /**
