@@ -53,11 +53,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
 
     @Override
     public void addSubscription(Object object) {
-        Class<?> clazz = object.getClass();
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            this.addSubscription(field, object);
-        }
+        this.configurationWrapperField(object).forEach(field -> this.addSubscription(field, object));
     }
 
     public void addSubscription(Field field, Object targetObj) {
@@ -139,7 +135,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
     }
 
     public void propertyInject(Object bean) {
-        Arrays.stream(bean.getClass().getDeclaredFields())
+        this.configurationWrapperField(bean).stream()
                 .filter(this::focus)
                 // 过滤@Value；spring赋值
                 .filter(field -> !field.isAnnotationPresent(Value.class))
@@ -151,6 +147,19 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                 });
     }
 
+    /**
+     * 获取对象的所有字段，可能是包装字段
+     * 当当前对象是@Configuration类时，spring会增强该类，代理了该类；返回原始父类的字段
+     * @see org.springframework.context.annotation.ConfigurationClassEnhancer$EnhancedConfiguration
+     * @see SpringConfigSubscription#configurationWrapperField(Object)
+     *
+     * @param bean 豆
+     * @return {@link List}<{@link Field}>
+     */
+    protected List<Field> configurationWrapperField(Object bean) {
+        return Arrays.asList(bean.getClass().getDeclaredFields());
+    }
+
 
     @Override
     public void propertyInject(ConfigEntity configEntity, List<Field> fieldList) {
@@ -160,7 +169,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                 Object fieldValue = resolveValue(field, configEntity.getValue());
                 List<Object> fieldTargetObjList = getFocusObjListByKey(configEntity.getKey());
                 for (Object fieldTargetObj : fieldTargetObjList) {
-                    if (fieldTargetObj != null && field.getDeclaringClass().equals(fieldTargetObj.getClass())) {
+                    if (fieldTargetObj != null && field.getDeclaringClass().isAssignableFrom(fieldTargetObj.getClass())) {
                         field.set(fieldTargetObj, fieldValue);
                     }
                 }

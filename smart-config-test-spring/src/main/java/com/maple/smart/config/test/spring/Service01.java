@@ -6,6 +6,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,7 @@ import java.util.List;
  * Description:
  */
 
-@Service
+@Configuration
 public class Service01 {
 
     @Value("${aa:true}")
@@ -42,7 +43,7 @@ public class Service01 {
 
     @PostConstruct
     private void init() {
-        System.out.println("list.contains(1) = " + list.contains(1));
+        //System.out.println("list.contains(1) = " + list.contains(1));
         System.out.println("this = " + this);
     }
 

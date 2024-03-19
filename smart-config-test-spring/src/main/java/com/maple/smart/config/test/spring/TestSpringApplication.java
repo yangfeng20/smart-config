@@ -2,6 +2,8 @@ package com.maple.smart.config.test.spring;
 
 
 import com.maple.config.core.annotation.EnableSmartConfig;
+import com.maple.config.core.annotation.JsonValue;
+import com.maple.config.core.annotation.SmartValue;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -24,6 +26,13 @@ import javax.annotation.Resource;
 public class TestSpringApplication {
     @Resource
     private Service01 service01;
+
+
+    @SmartValue("${main.test01:1111}")
+    private String test01;
+
+    @JsonValue("${main.test02}")
+    private Object test02;
 
 
     public static void main(String[] args) throws Exception {
