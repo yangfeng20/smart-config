@@ -94,7 +94,7 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
         String username = configRepository.getConfig("smart.username");
         String password = configRepository.getConfig("smart.password");
         if (username == null || password == null) {
-            throw new SmartConfigApplicationException("Smart-config:配置文件中【smart.username】和【smart.password】不能为空");
+            throw new SmartConfigApplicationException("Smart-config: 【smart.username】and【smart.password】cannot be empty in profile [" + localConfigPath + "]");
         }
     }
 
@@ -107,7 +107,7 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
             try {
                 webOperationControlPanel.start();
             } catch (Exception e) {
-                throw new SmartConfigApplicationException("Smart-config:启动webUi失败", e);
+                throw new SmartConfigApplicationException("Smart-config: start webui fail", e);
             }
         }, "smartConfig-web").start();
     }

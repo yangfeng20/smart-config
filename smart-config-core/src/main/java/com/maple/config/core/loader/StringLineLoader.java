@@ -1,5 +1,6 @@
 package com.maple.config.core.loader;
 
+import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.model.ReleaseStatusEnum;
 
@@ -26,14 +27,14 @@ public class StringLineLoader extends AbsConfigLoader {
         try {
             URL resource = this.getClass().getResource("/");
             if (resource == null) {
-                throw new RuntimeException("获取路径url为空");
+                throw new SmartConfigApplicationException("The [" + path + "] path does not exist");
             }
             Path basePath = Paths.get(resource.toURI());
             Path filePath = basePath.resolve(path);
             lineDataList = Files.readAllLines(filePath, Charset.defaultCharset());
 
         } catch (Exception e) {
-            throw new RuntimeException("加载本地配置文件失败", e);
+            throw new SmartConfigApplicationException("failed to load local configuration file", e);
         }
 
 

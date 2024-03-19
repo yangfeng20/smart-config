@@ -34,6 +34,6 @@ public class LoginServlet extends AbsConfigHttpServlet {
             return;
         }
 
-        throw new SmartConfigApplicationException("账号或密码错误");
+        throw new SmartConfigApplicationException("Login fail; Incorrect username or password");
     }
 }

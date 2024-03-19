@@ -123,7 +123,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
 
         String configKey = doParseKey(field);
         if (configKey == null || configKey.isEmpty()) {
-            throw new SmartConfigApplicationException(field.getDeclaringClass() + "." + field.getName() + " configKey is null or empty");
+            throw new SmartConfigApplicationException(ClassUtils.getFullFieldName(field) + " configKey is null or empty");
         }
         return configKey;
     }
@@ -150,11 +150,11 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
     /**
      * 获取对象的所有字段，可能是包装字段
      * 当当前对象是@Configuration类时，spring会增强该类，代理了该类；返回原始父类的字段
-     * @see org.springframework.context.annotation.ConfigurationClassEnhancer$EnhancedConfiguration
-     * @see SpringConfigSubscription#configurationWrapperField(Object)
      *
      * @param bean 豆
      * @return {@link List}<{@link Field}>
+     * @see org.springframework.context.annotation.ConfigurationClassEnhancer$EnhancedConfiguration
+     * @see SpringConfigSubscription#configurationWrapperField(Object)
      */
     protected List<Field> configurationWrapperField(Object bean) {
         return Arrays.asList(bean.getClass().getDeclaredFields());
@@ -163,7 +163,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
 
     @Override
     public void propertyInject(ConfigEntity configEntity, List<Field> fieldList) {
-        fieldList.forEach(field -> {
+        for (Field field : fieldList) {
             field.setAccessible(true);
             try {
                 Object fieldValue = resolveValue(field, configEntity.getValue());
@@ -174,9 +174,9 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                     }
                 }
             } catch (Exception e) {
-                throw new SmartConfigApplicationException("解析value异常", e);
+                throw new SmartConfigApplicationException(ClassUtils.getFullFieldName(field) + "resolveValue or inject error", e);
             }
-        });
+        }
     }
 
     protected boolean isSimpleTypeAnnotation(Field field) {
@@ -195,7 +195,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             configValue = resolveFieldDefaultValue(field);
         }
         if (configValue == null) {
-            throw new SmartConfigApplicationException(field.getDeclaringClass() + "." + field.getName()
+            throw new SmartConfigApplicationException(ClassUtils.getFullFieldName(field)
                     + " configValue cannot be null without a default value");
         }
 

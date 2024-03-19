@@ -2,10 +2,12 @@ package com.maple.config.core.utils;
 
 import com.maple.config.core.exp.SmartConfigApplicationException;
 import javafx.util.Pair;
+import lombok.NonNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -90,5 +92,9 @@ public class ClassUtils {
             defaultValue = PlaceholderResolver.defResolveText(defaultValue, keyResolver);
         }
         return new Pair<>(keyAndDefaultValArr[0], defaultValue);
+    }
+
+    public static String getFullFieldName(@NonNull Field field) {
+        return field.getDeclaringClass().getName() + "." + field.getName();
     }
 }

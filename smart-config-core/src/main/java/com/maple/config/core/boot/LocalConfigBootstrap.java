@@ -75,7 +75,7 @@ public class LocalConfigBootstrap extends AbsConfigBootstrap {
 
     public List<Class<?>> scanClass() {
         if (packagePathList == null || packagePathList.isEmpty()) {
-            throw new IllegalArgumentException("请指定包名路径");
+            throw new IllegalArgumentException("please Specify the path of the package name to scan");
         }
 
         List<Class<?>> scannerResult = new ArrayList<>();
@@ -84,7 +84,7 @@ public class LocalConfigBootstrap extends AbsConfigBootstrap {
                 List<Class<?>> classes = ClassUtils.getClasses(packagePath);
                 scannerResult.addAll(classes);
             } catch (ClassNotFoundException | IOException e) {
-                throw new SmartConfigApplicationException("扫描类失败", e);
+                throw new SmartConfigApplicationException("Scan class failed in " + packagePath + " packet path", e);
             }
         }
         return scannerResult;
