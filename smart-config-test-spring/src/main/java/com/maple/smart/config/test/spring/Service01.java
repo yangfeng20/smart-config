@@ -35,6 +35,7 @@ public class Service01 {
     @SmartValue("${bbb:222-${ccc}}")
     private String val2;
 
+    // Could not resolve placeholder 'abc' in value "${abc}"
     @Value("${ccc:ddd}")
     private String val3;
 

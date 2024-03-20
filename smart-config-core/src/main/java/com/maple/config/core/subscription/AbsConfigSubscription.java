@@ -215,9 +215,11 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
         if (configValue == null) {
             configValue = resolveFieldDefaultValue(field);
         }
+
+        // 配置文件中当前字段key没有对应值，且字段的直接上没有默认值，抛出异常
         if (configValue == null) {
             throw new SmartConfigApplicationException(fullFieldName
-                    + " configValue cannot be null without a default value");
+                    + " cannot be null without a default value");
         }
 
         if (isSimpleTypeAnnotation(field)) {
@@ -248,7 +250,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             }
 
             // 使用@Value 或者 @SmartValue 来进行json的value数据
-            if (JSON.isValid(configValue)) {
+            if (Integer.parseInt(JSON.VERSION.split("\\.")[2]) >= 60 && JSON.isValid(configValue)) {
                 throw new SmartConfigApplicationException(fullFieldName +
                         " @Value or @SmartValue not support json,please use @JsonValue");
             }
@@ -267,7 +269,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             }
 
             // 不是有效的json格式，阿里巴巴的parseObject也能解析，但可能导致数据不准确
-            if (!JSON.isValid(configValue)) {
+            if (Integer.parseInt(JSON.VERSION.split("\\.")[2]) >= 60 && !JSON.isValid(configValue)) {
                 log.warn("The configuration value associated with the [" + fullFieldName
                         + "] field is not a valid json format, and it is possible that the field is causing incorrect data");
             }
