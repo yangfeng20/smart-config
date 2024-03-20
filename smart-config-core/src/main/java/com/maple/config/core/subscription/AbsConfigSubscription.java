@@ -169,7 +169,13 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                 Object fieldValue = resolveValue(field, configEntity.getValue());
                 List<Object> fieldTargetObjList = getFocusObjListByKey(configEntity.getKey());
                 for (Object fieldTargetObj : fieldTargetObjList) {
-                    if (fieldTargetObj != null && field.getDeclaringClass().isAssignableFrom(fieldTargetObj.getClass())) {
+                    if (fieldTargetObj == null) {
+                        // 非spring应用，静态配置类
+                        field.set(null, fieldValue);
+                        continue;
+                    }
+                    // spring应用，有可能是代理对象，需要判断字段所在类是否为字段所在对象类型本身或者父类
+                    if (field.getDeclaringClass().isAssignableFrom(fieldTargetObj.getClass())) {
                         field.set(fieldTargetObj, fieldValue);
                     }
                 }
