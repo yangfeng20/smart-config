@@ -39,7 +39,7 @@ public abstract class AbsConfigRepository implements ConfigRepository {
     }
 
     @Override
-    public boolean addConfig(ConfigEntity configEntity) {
+    public void addConfig(ConfigEntity configEntity) {
         if (configEntity == null || configEntity.getKey() == null || configEntity.getKey().isEmpty()) {
             throw new SmartConfigApplicationException("config key is not empty");
         }
@@ -55,7 +55,6 @@ public abstract class AbsConfigRepository implements ConfigRepository {
             return oldConfigEntity;
         });
         waitReleaseKeyList.add(configEntity.getKey());
-        return containsKey;
     }
 
     @Override
@@ -65,6 +64,17 @@ public abstract class AbsConfigRepository implements ConfigRepository {
 
     @Override
     public ConfigEntity getConfigEntity(String key) {
+        ConfigEntity configEntity = configEntityMap.get(key);
+        if (configEntity == null){
+            return null;
+        }
+        String resolveValue = this.resolvePlaceholders(configEntity.getValue());
+        configEntity.setValue(resolveValue);
+        return configEntity;
+    }
+
+    @Override
+    public ConfigEntity getOriginalConfigEntity(String key) {
         return configEntityMap.get(key);
     }
 

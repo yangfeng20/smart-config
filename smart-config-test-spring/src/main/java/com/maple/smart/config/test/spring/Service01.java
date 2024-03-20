@@ -2,6 +2,7 @@ package com.maple.smart.config.test.spring;
 
 import com.maple.config.core.annotation.JsonValue;
 import com.maple.config.core.annotation.SmartValue;
+import com.maple.config.core.model.ConfigEntity;
 import lombok.Getter;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -28,7 +29,7 @@ public class Service01 {
     @Value("${aa:true}")
     private boolean aa;
 
-    @Value("${aaa:111-${ccc}}")
+    @SmartValue("${aaa:111-${abc}}")
     private String val1;
 
     @SmartValue("${bbb:222-${ccc}}")
@@ -40,8 +41,8 @@ public class Service01 {
     @JsonValue("${list:[]}")
     public List<Integer> list;
 
-    @JsonValue("${obj:{\"key\":\"11111\",\"value\":\"222\",\"desc\":\"333\",\"status\":444,\"durable\":false,\"createDate\":\"2022-10-21 08:45:31\",\"updateDate\":\"2024-05-22 06:05:36\"}}")
-    public Object obj;
+    @JsonValue("${obj:{}}")
+    public ConfigEntity obj;
 
     @PostConstruct
     private void init() {

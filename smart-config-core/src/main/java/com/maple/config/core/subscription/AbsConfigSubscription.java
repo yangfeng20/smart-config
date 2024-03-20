@@ -13,6 +13,7 @@ import com.maple.config.core.utils.ClassUtils;
 import com.maple.config.core.utils.Lists;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.lang.annotation.Annotation;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
  * Description:
  */
 
+@Slf4j
 public abstract class AbsConfigSubscription implements ConfigSubscription, PropertyInject {
 
     @Setter
@@ -116,6 +118,16 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
         configListeners.add(configListener);
     }
 
+    /**
+     * 当前字段是否应该被关注<p></p>
+     * 影响到当前字段是否需要被添加到观察者列表；以及当前字段是否需要赋值注入
+     *
+     * @param field 字段
+     * @return boolean
+     * @see AbsConfigSubscription#addSubscription(Field, Object)
+     * @see PropertyInject#propertyInject(Object)
+     * @see AbsConfigSubscription#propertyInject(Object)
+     */
     protected abstract boolean focus(Field field);
 
 
@@ -180,7 +192,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                     }
                 }
             } catch (Exception e) {
-                throw new SmartConfigApplicationException(ClassUtils.getFullFieldName(field) + "resolveValue or inject error", e);
+                throw new SmartConfigApplicationException(ClassUtils.getFullFieldName(field) + " resolveValue or inject error", e);
             }
         }
     }
@@ -190,18 +202,21 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
     }
 
     protected String resolveFieldDefaultValue(Field field) {
-        String configValue = ClassUtils.resolveAnnotation(field.getAnnotation(SmartValue.class), configRepository::getConfig).getValue();
+        Function<String, String> keyResolver = configRepository::getConfig;
+        String configValue = ClassUtils.resolveAnnotation(field.getAnnotation(SmartValue.class), keyResolver).getValue();
         return configValue != null ? configValue : ClassUtils.resolveAnnotation(field.getAnnotation(JsonValue.class),
-                configRepository::getConfig).getValue();
+                keyResolver).getValue();
     }
 
     protected Object resolveValue(Field field, String configValue) {
+        String fullFieldName = ClassUtils.getFullFieldName(field);
+
         // 配置文件中当前字段key没有对应值，查看字段的直接上是否有默认值
         if (configValue == null) {
             configValue = resolveFieldDefaultValue(field);
         }
         if (configValue == null) {
-            throw new SmartConfigApplicationException(ClassUtils.getFullFieldName(field)
+            throw new SmartConfigApplicationException(fullFieldName
                     + " configValue cannot be null without a default value");
         }
 
@@ -232,20 +247,34 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                 return new BigInteger(configValue);
             }
 
+            // 使用@Value 或者 @SmartValue 来进行json的value数据
             if (JSON.isValid(configValue)) {
-                throw new SmartConfigApplicationException("@Value or @SmartValue not support json,please use @JsonValue");
+                throw new SmartConfigApplicationException(fullFieldName +
+                        " @Value or @SmartValue not support json,please use @JsonValue");
             }
 
-            // 错误提示更加清晰，使用@Value，来进行json的
+            // 字段是其他基本类型，未支持
             throw new SmartConfigApplicationException("Unsupported type: " + fieldType.getName() + " for 【 "
                     + field.getDeclaringClass() + "." + field.getName() + " 】");
         }
 
         if (field.isAnnotationPresent(JsonValue.class)) {
             Type fieldGenericType = field.getGenericType();
+            // 字段是String类型，不支持;因为json解析之后可能少数据
+            if (String.class.equals(fieldGenericType)) {
+                throw new SmartConfigApplicationException(fullFieldName +
+                        " @JsonValue not support String,please use @Value or @SmartValue");
+            }
+
+            // 不是有效的json格式，阿里巴巴的parseObject也能解析，但可能导致数据不准确
+            if (!JSON.isValid(configValue)) {
+                log.warn("The configuration value associated with the [" + fullFieldName
+                        + "] field is not a valid json format, and it is possible that the field is causing incorrect data");
+            }
             return JSON.parseObject(configValue, fieldGenericType);
         }
 
-        throw new SmartConfigApplicationException("debug error");
+        throw new SmartConfigApplicationException("The current field is not concerned, please refer to" +
+                " [com.maple.config.core.subscription.AbsConfigSubscription.focus]");
     }
 }

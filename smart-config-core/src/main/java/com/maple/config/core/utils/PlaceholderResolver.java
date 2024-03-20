@@ -3,6 +3,7 @@ package com.maple.config.core.utils;
 import javafx.util.Pair;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.function.Function;
  * Description:
  */
 
+@Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlaceholderResolver {
@@ -58,6 +60,7 @@ public class PlaceholderResolver {
         String innerKey = text.substring(startInx + prefix.length(), endInx);
         String placeholderValue = keyResolver.apply(innerKey);
         if (placeholderValue == null) {
+            log.warn("[ " + text + " ] failed to resolve successfully;[[ " + innerKey + " ]] can't find the mapped value in the configuration repository");
             return text;
         }
 

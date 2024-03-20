@@ -18,12 +18,14 @@ public interface ConfigRepository {
      * 添加配置
      *
      * @param configEntity config 实体
-     * @return boolean
      */
-    boolean addConfig(ConfigEntity configEntity);
+    void addConfig(ConfigEntity configEntity);
 
     /**
      * 获取配置
+     * value未进行占位符解析
+     * 如果需要解析占位符，请结合
+     * {@link ConfigRepository#resolvePlaceholders(String)}
      *
      * @param key key
      * @return {@link String}
@@ -32,11 +34,22 @@ public interface ConfigRepository {
 
     /**
      * 获取配置实体
+     * value进行了占位符解析
+     * @see ConfigRepository#resolvePlaceholders(String)
      *
      * @param key key
      * @return {@link ConfigEntity}
      */
     ConfigEntity getConfigEntity(String key);
+
+    /**
+     * 获取配置实体<p></p>
+     * value未进行占位符解析
+     *
+     * @param key key
+     * @return {@link ConfigEntity}
+     */
+    ConfigEntity getOriginalConfigEntity(String key);
 
     /**
      * 配置列表
