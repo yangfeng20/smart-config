@@ -65,7 +65,7 @@ public abstract class AbsConfigRepository implements ConfigRepository {
     @Override
     public ConfigEntity getConfigEntity(String key) {
         ConfigEntity configEntity = configEntityMap.get(key);
-        if (configEntity == null){
+        if (configEntity == null) {
             return null;
         }
         String resolveValue = this.resolvePlaceholders(configEntity.getValue());
@@ -108,7 +108,7 @@ public abstract class AbsConfigRepository implements ConfigRepository {
     @Override
     public void loader(Collection<ConfigEntity> configEntityList) {
         configEntityMap.putAll(configEntityList.stream()
-                .collect(Collectors.toMap(ConfigEntity::getKey, configEntity -> configEntity)));
+                .collect(Collectors.toMap(ConfigEntity::getKey, configEntity -> configEntity, (old, newV) -> newV)));
     }
 
     @Override

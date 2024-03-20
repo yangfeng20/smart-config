@@ -24,24 +24,36 @@ public class StringLineLoader extends AbsConfigLoader {
     @Override
     public Collection<ConfigEntity> loaderConfig(String path) {
         List<String> lineDataList;
-        try {
-            URL resource = this.getClass().getResource("/");
-            if (resource == null) {
-                throw new SmartConfigApplicationException("The [" + path + "] path does not exist");
+        URL resource = null;
+        if (path.startsWith("classpath:")) {
+            path = path.substring("classpath:".length());
+            if (path.startsWith("/")) {
+                path = path.substring(1);
             }
-            Path basePath = Paths.get(resource.toURI());
-            Path filePath = basePath.resolve(path);
+            resource = ClassLoader.getSystemResource(path);
+            if (resource == null) {
+                throw new SmartConfigApplicationException("File [ " + path + " ] does not exist on the current project classpath");
+            }
+        }
+
+        try {
+            if (resource == null) {
+                resource = Paths.get(path).toUri().toURL();
+            }
+            Path filePath = Paths.get(resource.toURI());
             lineDataList = Files.readAllLines(filePath, Charset.defaultCharset());
 
         } catch (Exception e) {
-            throw new SmartConfigApplicationException("failed to load local configuration file", e);
+            throw new SmartConfigApplicationException("failed to load local configuration file [ " + path + " ]", e);
         }
 
 
         String desc = "";
         Date createDate = new Date();
         List<ConfigEntity> configEntityList = new ArrayList<>((int) (lineDataList.size() / 0.75) + 1);
-        for (String lineStr : lineDataList) {
+        String lastRow = "";
+        for (int lineInx = 0; lineInx < lineDataList.size(); lineInx++) {
+            String lineStr = lastRow + lineDataList.get(lineInx).trim();
             if (configInferDesc && lineStr.startsWith("#")) {
                 desc = lineStr.substring(1).trim();
                 continue;
@@ -50,6 +62,15 @@ public class StringLineLoader extends AbsConfigLoader {
             if (!configInferDesc && lineStr.startsWith("#")) {
                 continue;
             }
+
+            // 配置文件连字符
+            if (lineStr.endsWith("\\") && lineInx + 1 < lineDataList.size() && lineDataList.get(lineInx + 1).startsWith(" ")) {
+                lastRow = lineStr.substring(0, lineStr.length() - 1);
+                continue;
+            } else {
+                lastRow = "";
+            }
+
             // 过滤空行和文件不规范的数据
             if (!lineStr.contains("=")) {
                 desc = "";

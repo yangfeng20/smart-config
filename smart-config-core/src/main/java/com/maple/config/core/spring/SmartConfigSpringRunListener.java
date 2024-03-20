@@ -10,7 +10,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import java.util.Collections;
-import java.util.List;
 
 /**
  * @author maple
@@ -20,22 +19,14 @@ import java.util.List;
 
 public class SmartConfigSpringRunListener implements SpringApplicationRunListener {
 
-    private boolean enableSmartConfig = false;
-
     private SmartConfigBootstrap smartConfigBootstrap;
+
+    private final EnableSmartConfig enableSmartConfig;
 
 
     public SmartConfigSpringRunListener(SpringApplication application, String[] args) {
         Class<?> mainClass = application.getMainApplicationClass();
-        EnableSmartConfig annotation = mainClass.getAnnotation(EnableSmartConfig.class);
-        if (annotation == null) {
-            return;
-        }
-        enableSmartConfig = true;
-        List<String> scannerPackagePathList = Collections.singletonList(mainClass.getPackage().getName());
-        smartConfigBootstrap = new SpringConfigBootstrap(annotation.descInfer(), annotation.webUiPort(),
-                annotation.localFilePath(), scannerPackagePathList);
-        smartConfigBootstrap.init();
+        enableSmartConfig = mainClass.getAnnotation(EnableSmartConfig.class);
     }
 
     @Override
@@ -45,11 +36,36 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
 
     @Override
     public void environmentPrepared(ConfigurableEnvironment environment) {
+        if (enableSmartConfig == null) {
+            return;
+        }
+        String configLocation = environment.getProperty("spring.config.location");
+        String activeProfiles = environment.getProperty("spring.profiles.active");
+
+        // 配置优先级 【 location > active(会加载默认) > 默认 】
+        if (configLocation == null && activeProfiles == null) {
+            configLocation = enableSmartConfig.localFilePath();
+        } else if (configLocation == null) {
+            configLocation = "classpath:application.properties;classpath:application-" + activeProfiles + ".properties";
+        }
+
+        boolean descInfer = enableSmartConfig.descInfer();
+        if (environment.getProperty("smart.config.desc.infer") != null) {
+            descInfer = Boolean.parseBoolean(environment.getProperty("smart.config.desc.infer"));
+        }
+
+        int webUiPort = enableSmartConfig.webUiPort();
+        if (environment.getProperty("smart.config.webui.port") != null) {
+            webUiPort = Integer.parseInt(environment.getProperty("smart.config.webui.port"));
+        }
+
+        smartConfigBootstrap = new SpringConfigBootstrap(descInfer, webUiPort, configLocation, Collections.emptyList());
+        smartConfigBootstrap.init();
     }
 
     @Override
     public void contextPrepared(ConfigurableApplicationContext context) {
-        if (!enableSmartConfig) {
+        if (enableSmartConfig == null) {
             return;
         }
 
@@ -64,7 +80,7 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
 
     @Override
     public void started(ConfigurableApplicationContext context) {
-        if (!enableSmartConfig) {
+        if (enableSmartConfig == null) {
             return;
         }
         // 仅启动webUI

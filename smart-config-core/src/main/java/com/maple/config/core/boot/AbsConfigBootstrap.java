@@ -90,9 +90,11 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
      * 加载配置到存储库
      */
     public void loaderConfigToRepository() {
-        for (ConfigLoader configLoader : configLoaderList) {
-            Collection<ConfigEntity> configEntityList = configLoader.loaderConfig(localConfigPath);
-            configRepository.loader(configEntityList);
+        for (String path : localConfigPath.split(";")) {
+            for (ConfigLoader configLoader : configLoaderList) {
+                Collection<ConfigEntity> configEntityList = configLoader.loaderConfig(path);
+                configRepository.loader(configEntityList);
+            }
         }
 
         String username = configRepository.getConfig("smart.username");
