@@ -7,6 +7,7 @@ import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.repository.ConfigRepository;
 import com.maple.config.core.subscription.ConfigSubscription;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +19,7 @@ import java.util.List;
  * Description:
  */
 
+@Slf4j
 public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
     /**
      * 配置描述推断
@@ -70,6 +72,8 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
     public void init() {
         loaderSpiImpl();
         loaderConfigToRepository();
+
+        log.info("Smart-Config init begin");
     }
 
     @Override
@@ -106,9 +110,10 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
         new Thread(() -> {
             try {
                 webOperationControlPanel.start();
+                log.info("WebUi start success with port(s): " + webUiPort);
             } catch (Exception e) {
                 throw new SmartConfigApplicationException("Smart-config: start webui fail", e);
             }
-        }, "smartConfig-web").start();
+        }, "SmartConfig-web").start();
     }
 }

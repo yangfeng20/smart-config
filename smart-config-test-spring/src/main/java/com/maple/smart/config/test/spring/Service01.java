@@ -2,6 +2,7 @@ package com.maple.smart.config.test.spring;
 
 import com.maple.config.core.annotation.JsonValue;
 import com.maple.config.core.annotation.SmartValue;
+import lombok.Getter;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -20,6 +21,7 @@ import java.util.List;
  * Description:
  */
 
+@Getter
 @Configuration
 public class Service01 {
 

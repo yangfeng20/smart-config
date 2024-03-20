@@ -1,7 +1,9 @@
 package com.maple.config.core.listener;
 
+import com.alibaba.fastjson2.JSON;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.subscription.ConfigSubscription;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
 
@@ -11,13 +13,14 @@ import java.util.Collection;
  * Description:
  */
 
+@Slf4j
 public class DefaultConfigListener implements ConfigListener {
 
     protected ConfigSubscription configSubscription;
 
     @Override
     public void onChange(Collection<ConfigEntity> changeConfigEntityList) {
-        System.out.println(this + " - changeConfigEntityList = " + changeConfigEntityList);
+        log.info("Repository release; changeList:{}", JSON.toJSON(changeConfigEntityList));
     }
 
     @Override
