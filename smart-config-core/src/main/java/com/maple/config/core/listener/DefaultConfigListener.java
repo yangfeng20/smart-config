@@ -1,6 +1,6 @@
 package com.maple.config.core.listener;
 
-import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson.JSON;
 import com.maple.config.core.model.ConfigEntity;
 import com.maple.config.core.subscription.ConfigSubscription;
 import lombok.extern.slf4j.Slf4j;
