@@ -67,13 +67,8 @@ public class WebOperationControlPanel {
     }
 
     public void start() throws Exception {
-
         webAppContext.getServer().start();
-        webAppContext.getServer().join();
-
-        // 启动服务器
-        server.start();
-        server.join();
+        //webAppContext.getServer().join();
     }
 
     public void addHandler(String uri, Class<? extends AbsConfigHttpServlet> handler) {

@@ -6,6 +6,7 @@ import com.maple.config.core.loader.ConfigLoader;
 import com.maple.config.core.repository.ConfigRepository;
 import com.maple.config.core.subscription.ConfigSubscription;
 import com.maple.config.core.utils.ClassUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.ServiceLoader;
  * Description:
  */
 
+@Slf4j
 public class LocalConfigBootstrap extends AbsConfigBootstrap {
 
 
@@ -29,6 +31,7 @@ public class LocalConfigBootstrap extends AbsConfigBootstrap {
     public void init() {
         super.init();
         scanClassAndSubscription();
+        log.debug("Smart-Config 扫描类并添加订阅完成");
         this.refreshConfig();
     }
 

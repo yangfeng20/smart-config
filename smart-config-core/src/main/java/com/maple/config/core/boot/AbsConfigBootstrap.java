@@ -70,15 +70,18 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
     public abstract void loaderSpiImpl();
 
     public void init() {
-        loaderSpiImpl();
-        loaderConfigToRepository();
-
         log.info("Smart-Config init begin");
+        loaderSpiImpl();
+        log.debug("Smart-Config 加载spi实现完成");
+        loaderConfigToRepository();
+        log.debug("Smart-Config 加载配置到本地仓库完成");
+
     }
 
     @Override
     public void refreshConfig() {
         configRepository.refresh();
+        log.debug("Smart-Config 本地配置刷新");
 
         if (!started) {
             startWebUi();
@@ -112,7 +115,7 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
         new Thread(() -> {
             try {
                 webOperationControlPanel.start();
-                log.info("WebUi start success with port(s): " + webUiPort);
+                log.info("Smart-Config WebUi start success with port(s): " + webUiPort);
             } catch (Exception e) {
                 throw new SmartConfigApplicationException("Smart-config: start webui fail", e);
             }
