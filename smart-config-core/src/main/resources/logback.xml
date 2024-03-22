@@ -11,6 +11,8 @@
     <property name="spring.pattern"
               value="${CONSOLE_LOG_PATTERN:-%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
 
+    <!--todo 当前能够区分springboot应用和非springboot应用。但是日志会打印logback初始化错误;不支持【 Ignoring unknown property [springProperty] in [ch.qos.logback.classic.LoggerContext]】-->
+    <!--todo 在springboot中中他是能够后置识别到的，但是由于当前配置文件在springboot前加载，所以会打印warn和error；参考：ch.qos.logback.core.util.StatusPrinter.printInCaseOfErrorsOrWarnings(ch.qos.logback.core.Context, long)-->
     <!--springboot应用获取应用名，设置过应用名使用彩色打印方案-->
     <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="default-app"/>
 
@@ -52,7 +54,7 @@
     </root>
 
     <!--smart-config记录器-->
-    <logger name="com.maple.config.core" level="debug" additivity="false">
+    <logger name="com.maple.config.core" level="info" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 
