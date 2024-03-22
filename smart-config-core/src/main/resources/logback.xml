@@ -5,13 +5,17 @@
                 https://raw.githubusercontent.com/enricopulatzo/logback-XSD/master/src/main/xsd/logback.xsd">
     <contextName>smart-config</contextName>
 
+    <!-- 非springboot环境输出格式-->
     <property name="base.pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
+    <!--springboot环境输出格式(包含色彩)-->
     <property name="spring.pattern"
               value="${CONSOLE_LOG_PATTERN:-%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
 
+    <!--springboot应用获取应用名，设置过应用名使用彩色打印方案-->
     <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="default-app"/>
 
-    <!--<if condition='isDefined("spring-env") &amp;&amp; property("spring-env").equals("org.springframework.boot.SpringApplication")'>-->
+
+    <!--定义过appName并且appName不等于default-app时，定义彩色输出的规则-->
     <if condition='isDefined("appName") &amp;&amp; !property("appName").equals("default-app")'>
         <then>
             <!-- 定义彩色输出的编码 -->

@@ -18,7 +18,7 @@ public class TestMain {
         List<String> list = new ArrayList<>();
         list.add("com.maple.smart.config.test");
         AbsConfigBootstrap bootstrap = new LocalConfigBootstrap(true, 6767,
-                "application.properties", list);
+                "classpath:application.properties", list);
         bootstrap.init();
 
         Service service = new Service();
