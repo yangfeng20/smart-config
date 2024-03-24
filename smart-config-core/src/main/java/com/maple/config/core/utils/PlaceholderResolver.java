@@ -1,6 +1,7 @@
 package com.maple.config.core.utils;
 
-import javafx.util.Pair;
+
+import com.maple.config.core.model.Pair;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

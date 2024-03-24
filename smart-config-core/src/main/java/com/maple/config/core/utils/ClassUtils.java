@@ -1,8 +1,8 @@
 package com.maple.config.core.utils;
 
 import com.maple.config.core.exp.SmartConfigApplicationException;
-import javafx.util.Pair;
 import lombok.NonNull;
+import com.maple.config.core.model.Pair;
 
 import java.io.File;
 import java.io.IOException;
