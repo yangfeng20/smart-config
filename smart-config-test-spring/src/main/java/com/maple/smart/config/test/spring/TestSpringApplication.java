@@ -36,6 +36,8 @@ public class TestSpringApplication {
 
 
     public static void main(String[] args) throws Exception {
+
+
         ConfigurableApplicationContext application = SpringApplication.run(TestSpringApplication.class, args);
 
         System.out.println("application.getBean(Service01.class).list = " + application.getBean(Service01.class).getList());
