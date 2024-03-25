@@ -82,8 +82,13 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
     @Override
     public void subscribe(List<ConfigEntity> configEntityList) {
         configEntityList.forEach(configEntity -> {
+            List<Field> fieldList = configSubscriberMap.get(configEntity.getKey());
+            if (fieldList == null || fieldList.isEmpty()){
+                // 当前配置没有字段观察者，下一个配置
+                return;
+            }
             // todo 为抛出异常，修改时间
-            this.propertyInject(configEntity, configSubscriberMap.get(configEntity.getKey()));
+            this.propertyInject(configEntity, fieldList);
             configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
         });
 
