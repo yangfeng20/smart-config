@@ -1,5 +1,8 @@
 package com.maple.config.core.boot;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.core.status.Status;
 import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.listener.ConfigListener;
 import com.maple.config.core.loader.ConfigLoader;
@@ -7,6 +10,8 @@ import com.maple.config.core.repository.ConfigRepository;
 import com.maple.config.core.subscription.ConfigSubscription;
 import com.maple.config.core.utils.ClassUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.ILoggerFactory;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +34,20 @@ public class LocalConfigBootstrap extends AbsConfigBootstrap {
 
     @Override
     public void init() {
+        // 非springboot应用缺省日志配置文件时设置root日志级别为info
+        ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
+        if (loggerFactory instanceof ch.qos.logback.classic.LoggerContext) {
+            ch.qos.logback.classic.LoggerContext context = (ch.qos.logback.classic.LoggerContext) loggerFactory;
+            for (Status status : context.getStatusManager().getCopyOfStatusList()) {
+                if (status.getMessage().contains("Setting up default configuration")) {
+                    log.debug("Smart-Config 缺省logback.xml配置日志级别为INFO");
+                    Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+                    rootLogger.setLevel(Level.INFO);
+                    break;
+                }
+            }
+        }
+
         super.init();
         scanClassAndSubscription();
         log.debug("Smart-Config 扫描类并添加订阅完成");
