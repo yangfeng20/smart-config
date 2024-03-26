@@ -22,9 +22,15 @@ import org.eclipse.jetty.webapp.WebAppContext;
 
 import javax.servlet.DispatcherType;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 
 /**
@@ -88,14 +94,31 @@ public class WebOperationControlPanel {
     }
 
     private URL buildWebTempRumEnv(Integer port) throws Exception {
-        InputStream inputStream = WebOperationControlPanel.class.getClassLoader().getResourceAsStream(SmartConfigConstant.JAR_FILE_PATH);
+        // 获取jar包文件，因为web目录不能在jar包中，所以要解压到临时目录中
+        InputStream inputStream;
+        if (WebOperationControlPanel.class.getClassLoader().getResource("") == null) {
+            // 非springboot环境
+            String jarOriginalPath = ClassUtils.getClassPathURLByClass(WebOperationControlPanel.class).getPath();
+            String jarPath;
+            if (File.separator.equals("/")) {
+                jarPath = jarOriginalPath.replace("file:", "").replace("!/", "");
+            } else {
+                // windows
+                jarPath = jarOriginalPath.replace("file:/", "").replace("!/", "");
+            }
+            jarPath = URLDecoder.decode(jarPath, StandardCharsets.UTF_8.name());
+            inputStream = Files.newInputStream(Paths.get(jarPath));
+        } else {
+            // springboot环境
+            inputStream = WebOperationControlPanel.class.getClassLoader().getResourceAsStream(SmartConfigConstant.JAR_FILE_PATH);
+        }
         if (inputStream == null) {
             throw new SmartConfigApplicationException("Failed to obtain the smart-config web environment jar. path:" + SmartConfigConstant.JAR_FILE_PATH);
         }
 
+        // 构建临时目录文件夹名称
         String tempRumEnvBaseDir = buildTempRumEnvBaseDir(port);
-
-        // todo 移除代码目录，是否还可以运行
+        // 解压jar包到临时文件夹中
         JarUtils.extractJarToDir(inputStream, tempRumEnvBaseDir);
 
         try {
@@ -103,7 +126,7 @@ public class WebOperationControlPanel {
         } catch (IOException e) {
             log.error("Failed to close inputStream", e);
         }
-        if (!tempRumEnvBaseDir.startsWith(File.separator)){
+        if (!tempRumEnvBaseDir.startsWith(File.separator)) {
             tempRumEnvBaseDir = File.separator + tempRumEnvBaseDir;
         }
 

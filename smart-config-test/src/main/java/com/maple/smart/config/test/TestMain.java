@@ -15,6 +15,9 @@ import java.util.List;
 public class TestMain {
     public static void main(String[] args) throws Exception {
 
+        // 调试jar包
+        Thread.sleep(3000);
+
         List<String> list = new ArrayList<>();
         list.add("com.maple.smart.config.test");
         AbsConfigBootstrap bootstrap = new LocalConfigBootstrap(true, 6767,

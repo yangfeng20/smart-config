@@ -1,19 +1,22 @@
 package com.maple.config.core.utils;
 
 import com.maple.config.core.exp.SmartConfigApplicationException;
-import lombok.NonNull;
 import com.maple.config.core.model.Pair;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.function.Function;
@@ -45,18 +48,44 @@ public class ClassUtils {
         String path = packageName.replace('.', '/');
         Enumeration<URL> resources = classLoader.getResources(path);
         List<File> dirs = new ArrayList<>();
+        List<URL> urls = new ArrayList<>();
         while (resources.hasMoreElements()) {
             URL resource = resources.nextElement();
-            dirs.add(new File(URLDecoder.decode(resource.getFile(), "utf-8")));
+            if ("jar".equals(resource.getProtocol())) {
+                urls.add(resource);
+            } else {
+                dirs.add(new File(URLDecoder.decode(resource.getFile(), "utf-8")));
+            }
         }
         List<Class<?>> classes = new ArrayList<>();
+
+        for (URL url : urls) {
+            classes.addAll(findClassesByJar(url));
+        }
         for (File directory : dirs) {
-            classes.addAll(findClasses(directory, packageName));
+            classes.addAll(findClassesByFile(directory, packageName));
         }
         return classes;
     }
 
-    private static List<Class<?>> findClasses(File directory, String packageName) throws ClassNotFoundException {
+    private static List<Class<?>> findClassesByJar(URL url) throws ClassNotFoundException, UnsupportedEncodingException {
+        // jar
+        String jarOriginalPath = URLDecoder.decode(url.getFile(), "utf-8");
+        if (!jarOriginalPath.contains("jar!/")) {
+            return Collections.emptyList();
+        }
+        if (File.separator.equals("/")) {
+            jarOriginalPath = jarOriginalPath.replace("file:", "");
+        } else {
+            // windows
+            jarOriginalPath = jarOriginalPath.replace("file:/", "");
+        }
+        String[] jarPathAndPackagePath = jarOriginalPath.split("jar!/", 2);
+        return JarUtils.loaderClassFromJar(jarPathAndPackagePath[0] + "jar", jarPathAndPackagePath[1]);
+
+    }
+
+    private static List<Class<?>> findClassesByFile(File directory, String packageName) throws ClassNotFoundException {
         List<Class<?>> classes = new ArrayList<>();
         if (!directory.exists()) {
             return classes;
@@ -68,7 +97,7 @@ public class ClassUtils {
         for (File file : files) {
             if (file.isDirectory()) {
                 assert !file.getName().contains(".");
-                classes.addAll(findClasses(file, packageName + "." + file.getName()));
+                classes.addAll(findClassesByFile(file, packageName + "." + file.getName()));
             } else if (file.getName().endsWith(".class")) {
                 classes.add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
             }
