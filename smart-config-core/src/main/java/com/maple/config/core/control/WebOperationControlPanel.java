@@ -1,10 +1,14 @@
 package com.maple.config.core.control;
 
+import com.maple.config.core.exp.SmartConfigApplicationException;
 import com.maple.config.core.repository.ConfigRepository;
-import com.maple.config.core.utils.UrlUtil;
+import com.maple.config.core.utils.ClassUtils;
+import com.maple.config.core.utils.JarUtils;
+import com.maple.config.core.utils.SmartConfigConstant;
 import com.maple.config.core.web.filter.AuthFilter;
 import com.maple.config.core.web.filter.GlobalFilter;
 import com.maple.config.core.web.servlet.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
 import org.eclipse.jetty.jsp.JettyJspServlet;
@@ -17,6 +21,9 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import javax.servlet.DispatcherType;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.EnumSet;
 
@@ -25,23 +32,28 @@ import java.util.EnumSet;
  * @since 2024/3/7 22:05
  * Description:
  */
-
+@Slf4j
 public class WebOperationControlPanel {
-
-    private final ConfigRepository configRepository;
-    private final Server server;
 
     private final WebAppContext webAppContext;
 
     public WebOperationControlPanel(ConfigRepository configRepository, Integer port) {
-        this.configRepository = configRepository;
-
-        server = new Server(port);
+        Server server = new Server(port);
         webAppContext = new WebAppContext();
-        webAppContext.setAttribute("configRepository", configRepository);
-        URL webappResourceRootPath = UrlUtil.getParentURL(WebOperationControlPanel.class.getClassLoader().getResource("index.html"));
-        webAppContext.setBaseResource(Resource.newResource(webappResourceRootPath));
+
+        try {
+            URL webappResourceRootPath = ClassUtils.getClassPathURLByClass(WebOperationControlPanel.class);
+            if (webappResourceRootPath.getProtocol().equals("jar")) {
+                webappResourceRootPath = buildWebTempRumEnv(port);
+            }
+            webAppContext.setBaseResource(Resource.newResource(webappResourceRootPath));
+        } catch (Exception e) {
+            throw new SmartConfigApplicationException("Failed to build the web temp environment", e);
+
+        }
+
         webAppContext.setDisplayName("smart-config");
+        webAppContext.setAttribute("configRepository", configRepository);
         webAppContext.setClassLoader(Thread.currentThread().getContextClassLoader());
         webAppContext.setConfigurationDiscovered(true);
         webAppContext.setParentLoaderPriority(true);
@@ -73,6 +85,37 @@ public class WebOperationControlPanel {
 
     public void addHandler(String uri, Class<? extends AbsConfigHttpServlet> handler) {
         webAppContext.addServlet(new ServletHolder(handler), uri);
+    }
+
+    private URL buildWebTempRumEnv(Integer port) throws Exception {
+        InputStream inputStream = WebOperationControlPanel.class.getClassLoader().getResourceAsStream(SmartConfigConstant.JAR_FILE_PATH);
+        if (inputStream == null) {
+            throw new SmartConfigApplicationException("Failed to obtain the smart-config web environment jar. path:" + SmartConfigConstant.JAR_FILE_PATH);
+        }
+
+        String tempRumEnvBaseDir = buildTempRumEnvBaseDir(port);
+
+        // todo 移除代码目录，是否还可以运行
+        JarUtils.extractJarToDir(inputStream, tempRumEnvBaseDir);
+
+        try {
+            inputStream.close();
+        } catch (IOException e) {
+            log.error("Failed to close inputStream", e);
+        }
+        if (!tempRumEnvBaseDir.startsWith(File.separator)){
+            tempRumEnvBaseDir = File.separator + tempRumEnvBaseDir;
+        }
+
+        return new URL("file:" + tempRumEnvBaseDir.replace(" ", "%20"));
+    }
+
+    private String buildTempRumEnvBaseDir(Integer port) {
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        if (!tmpDir.endsWith(File.separator)) {
+            tmpDir += File.separator;
+        }
+        return tmpDir + "smart-config.jetty." + port + "." + System.currentTimeMillis();
     }
 
 

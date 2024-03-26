@@ -3,6 +3,7 @@ package com.maple.config.core.utils;
 import com.maple.config.core.exp.SmartConfigApplicationException;
 import lombok.NonNull;
 import com.maple.config.core.model.Pair;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +21,25 @@ import java.util.function.Function;
 /**
  * @author maple
  */
+
+@Slf4j
 public class ClassUtils {
+
+    public static URL getClassPathURLByClass(Class<?> clazz) throws Exception {
+        URL resource = clazz.getResource("");
+        if (resource == null) {
+            throw new SmartConfigApplicationException("can not find classpath by class: " + clazz.getName());
+        }
+
+        log.debug("getClassPathURLByClass resource path:{}", resource);
+        String packageName = clazz.getPackage().getName().replace(".", "/");
+        // 去除包路径
+        String url = resource.getPath().replace(packageName + "/", "");
+        String classPath = resource.getProtocol() + ":" + url;
+        log.debug("getClassPathURLByClass classPath:{}", classPath);
+        return new URL(classPath);
+    }
+
     public static List<Class<?>> getClasses(String packageName) throws ClassNotFoundException, IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         String path = packageName.replace('.', '/');
