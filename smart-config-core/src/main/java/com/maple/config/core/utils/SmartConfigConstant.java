@@ -8,7 +8,7 @@ package com.maple.config.core.utils;
 
 public class SmartConfigConstant {
 
-    private final static String LIB_PATH = "BOOT-INF/lib/";
+    public final static String LIB_PATH = "BOOT-INF/lib/";
     private final static String APP_NAME = "smart-config-core";
 
     private final static String VERSION = "1.0-SNAPSHOT";

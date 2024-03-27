@@ -22,12 +22,10 @@ import org.eclipse.jetty.webapp.WebAppContext;
 
 import javax.servlet.DispatcherType;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -50,7 +48,7 @@ public class WebOperationControlPanel {
         try {
             URL webappResourceRootPath = ClassUtils.getClassPathURLByClass(WebOperationControlPanel.class);
             if (webappResourceRootPath.getProtocol().equals("jar")) {
-                webappResourceRootPath = buildWebTempRumEnv(port);
+                webappResourceRootPath = buildWebTempRumEnv(port, webappResourceRootPath);
             }
             webAppContext.setBaseResource(Resource.newResource(webappResourceRootPath));
         } catch (Exception e) {
@@ -93,11 +91,12 @@ public class WebOperationControlPanel {
         webAppContext.addServlet(new ServletHolder(handler), uri);
     }
 
-    private URL buildWebTempRumEnv(Integer port) throws Exception {
+    private URL buildWebTempRumEnv(Integer port, URL classPath) throws Exception {
         // 获取jar包文件，因为web目录不能在jar包中，所以要解压到临时目录中
         InputStream inputStream;
-        if (WebOperationControlPanel.class.getClassLoader().getResource("") == null) {
-            // 非springboot环境
+        if (WebOperationControlPanel.class.getClassLoader().getResource("") == null ||
+                !classPath.getPath().contains(SmartConfigConstant.LIB_PATH)) {
+            // 前面条件为非springboot环境，后面条件是maven仓库【未打包】
             String jarOriginalPath = ClassUtils.getClassPathURLByClass(WebOperationControlPanel.class).getPath();
             String jarPath;
             if (File.separator.equals("/")) {
@@ -109,7 +108,7 @@ public class WebOperationControlPanel {
             jarPath = URLDecoder.decode(jarPath, StandardCharsets.UTF_8.name());
             inputStream = Files.newInputStream(Paths.get(jarPath));
         } else {
-            // springboot环境
+            // jar包 springboot环境
             inputStream = WebOperationControlPanel.class.getClassLoader().getResourceAsStream(SmartConfigConstant.JAR_FILE_PATH);
         }
         if (inputStream == null) {

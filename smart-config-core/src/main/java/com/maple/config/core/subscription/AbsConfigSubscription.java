@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -83,7 +84,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
     public void subscribe(List<ConfigEntity> configEntityList) {
         configEntityList.forEach(configEntity -> {
             List<Field> fieldList = configSubscriberMap.get(configEntity.getKey());
-            if (fieldList == null || fieldList.isEmpty()){
+            if (fieldList == null || fieldList.isEmpty()) {
                 // 当前配置没有字段观察者，下一个配置
                 return;
             }
@@ -187,6 +188,10 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                 List<Object> fieldTargetObjList = getFocusObjListByKey(configEntity.getKey());
                 for (Object fieldTargetObj : fieldTargetObjList) {
                     if (fieldTargetObj == null) {
+                        if (!Modifier.isStatic(field.getModifiers())) {
+                            throw new SmartConfigApplicationException(ClassUtils.getFullFieldName(field)
+                                    + " Non-springboot applications only support static fields");
+                        }
                         // 非spring应用，静态配置类
                         field.set(null, fieldValue);
                         continue;
