@@ -1,7 +1,7 @@
 package com.maple.smart.config.test;
 
-import com.maple.config.core.boot.AbsConfigBootstrap;
-import com.maple.config.core.boot.LocalConfigBootstrap;
+import com.maple.smart.config.core.boot.AbsConfigBootstrap;
+import com.maple.smart.config.core.boot.LocalConfigBootstrap;
 
 import java.util.ArrayList;
 import java.util.List;

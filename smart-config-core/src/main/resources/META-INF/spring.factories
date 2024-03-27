@@ -1,8 +1,8 @@
-com.maple.config.core.loader.ConfigLoader=com.maple.config.core.loader.StringLineLoader
-com.maple.config.core.repository.ConfigRepository=com.maple.config.core.repository.DefaultConfigRepository
-com.maple.config.core.subscription.ConfigSubscription=com.maple.config.core.subscription.SpringConfigSubscription
-com.maple.config.core.listener.ConfigListener=com.maple.config.core.listener.DefaultConfigListener
+com.maple.smart.config.core.loader.ConfigLoader=com.maple.smart.config.core.loader.StringLineLoader
+com.maple.smart.config.core.repository.ConfigRepository=com.maple.smart.config.core.repository.DefaultConfigRepository
+com.maple.smart.config.core.subscription.ConfigSubscription=com.maple.smart.config.core.subscription.SpringConfigSubscription
+com.maple.smart.config.core.listener.ConfigListener=com.maple.smart.config.core.listener.DefaultConfigListener
 
 org.springframework.boot.SpringApplicationRunListener=\
 org.springframework.boot.context.event.EventPublishingRunListener,\
-com.maple.config.core.spring.SmartConfigSpringRunListener
+com.maple.smart.config.core.spring.SmartConfigSpringRunListener

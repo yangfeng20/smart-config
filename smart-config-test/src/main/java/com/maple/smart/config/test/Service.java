@@ -1,8 +1,8 @@
 package com.maple.smart.config.test;
 
-import com.maple.config.core.annotation.JsonValue;
-import com.maple.config.core.annotation.SmartValue;
-import com.maple.config.core.model.ConfigEntity;
+import com.maple.smart.config.core.annotation.JsonValue;
+import com.maple.smart.config.core.annotation.SmartValue;
+import com.maple.smart.config.core.model.ConfigEntity;
 
 import java.util.List;
 

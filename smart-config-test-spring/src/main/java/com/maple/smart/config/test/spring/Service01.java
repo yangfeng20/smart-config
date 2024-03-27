@@ -1,8 +1,8 @@
 package com.maple.smart.config.test.spring;
 
-import com.maple.config.core.annotation.JsonValue;
-import com.maple.config.core.annotation.SmartValue;
-import com.maple.config.core.model.ConfigEntity;
+import com.maple.smart.config.core.annotation.JsonValue;
+import com.maple.smart.config.core.annotation.SmartValue;
+import com.maple.smart.config.core.model.ConfigEntity;
 import lombok.Getter;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;

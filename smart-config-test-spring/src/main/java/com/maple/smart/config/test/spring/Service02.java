@@ -1,7 +1,7 @@
 package com.maple.smart.config.test.spring;
 
-import com.maple.config.core.annotation.JsonValue;
-import com.maple.config.core.annotation.SmartValue;
+import com.maple.smart.config.core.annotation.JsonValue;
+import com.maple.smart.config.core.annotation.SmartValue;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
