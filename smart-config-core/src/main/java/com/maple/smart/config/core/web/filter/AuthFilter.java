@@ -1,5 +1,7 @@
 package com.maple.smart.config.core.web.filter;
 
+import com.alibaba.fastjson.JSONObject;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,7 +18,8 @@ import java.util.List;
 
 public class AuthFilter implements Filter {
 
-    private final List<String> notAuthUrl = Arrays.asList("/login", "/");
+    private final List<String> notAuthUrl = Arrays.asList("/config/login", "/");
+    private final List<String> bizUrl = Arrays.asList("/list", "/release", "save");
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -29,7 +32,7 @@ public class AuthFilter implements Filter {
         HttpServletResponse resp = (HttpServletResponse) response;
 
         if (!notAuthUrl.contains(req.getRequestURI())) {
-            if(authHandler(req, resp)){
+            if (authHandler(req, resp)) {
                 return;
             }
         }
@@ -45,7 +48,10 @@ public class AuthFilter implements Filter {
     private boolean authHandler(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         HttpSession session = req.getSession(false);
         if (session == null) {
-            req.getRequestDispatcher("/login.html").forward(req, resp);
+            JSONObject response = new JSONObject();
+            response.put("code", 401);
+            resp.setContentType("application/json;charset=utf-8");
+            resp.getWriter().write(response.toJSONString());
             return true;
         }
 

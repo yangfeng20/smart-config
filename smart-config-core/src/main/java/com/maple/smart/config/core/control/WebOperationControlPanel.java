@@ -1,13 +1,14 @@
 package com.maple.smart.config.core.control;
 
+import com.maple.smart.config.core.exp.SmartConfigApplicationException;
+import com.maple.smart.config.core.repository.ConfigRepository;
 import com.maple.smart.config.core.utils.ClassUtils;
 import com.maple.smart.config.core.utils.JarUtils;
 import com.maple.smart.config.core.utils.SmartConfigConstant;
 import com.maple.smart.config.core.web.filter.AuthFilter;
 import com.maple.smart.config.core.web.filter.GlobalFilter;
-import com.maple.smart.config.core.web.servlet.*;
-import com.maple.smart.config.core.exp.SmartConfigApplicationException;
-import com.maple.smart.config.core.repository.ConfigRepository;
+import com.maple.smart.config.core.web.servlet.AbsConfigHttpServlet;
+import com.maple.smart.config.core.web.servlet.BaseConfigHttpServlet;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.scan.StandardJarScanner;
 import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
@@ -73,10 +74,7 @@ public class WebOperationControlPanel {
         server.setHandler(webAppContext);
 
         // 添加servlet处理器
-        this.addHandler("/login", LoginServlet.class);
-        this.addHandler("/list", ListConfigServlet.class);
-        this.addHandler("/edit", EditConfigServlet.class);
-        this.addHandler("/release", ReleaseConfigServlet.class);
+        this.addHandler("/config/*", BaseConfigHttpServlet.class);
 
         // 设置服务器的处理器
         server.setHandler(webAppContext);

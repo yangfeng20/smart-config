@@ -47,12 +47,12 @@ public abstract class AbsConfigRepository implements ConfigRepository {
         boolean containsKey = configEntityMap.containsKey(configEntity.getKey());
         configEntityMap.compute(configEntity.getKey(), (configKey, oldConfigEntity) -> {
             if (oldConfigEntity == null) {
+                configEntity.setCreateDate(new Date());
                 return configEntity;
             }
-            oldConfigEntity.setValue(configEntity.getValue());
-            oldConfigEntity.setStatus(configEntity.getStatus());
-            oldConfigEntity.setUpdateDate(new Date());
-            return oldConfigEntity;
+            configEntity.setUpdateDate(new Date());
+            configEntity.setCreateDate(oldConfigEntity.getCreateDate());
+            return configEntity;
         });
         waitReleaseKeyList.add(configEntity.getKey());
     }
