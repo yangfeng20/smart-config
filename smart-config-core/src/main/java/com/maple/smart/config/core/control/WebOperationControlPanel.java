@@ -10,14 +10,9 @@ import com.maple.smart.config.core.web.filter.GlobalFilter;
 import com.maple.smart.config.core.web.servlet.AbsConfigHttpServlet;
 import com.maple.smart.config.core.web.servlet.BaseConfigHttpServlet;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.scan.StandardJarScanner;
-import org.eclipse.jetty.apache.jsp.JettyJasperInitializer;
-import org.eclipse.jetty.jsp.JettyJspServlet;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 
@@ -62,10 +57,6 @@ public class WebOperationControlPanel {
         webAppContext.setClassLoader(Thread.currentThread().getContextClassLoader());
         webAppContext.setConfigurationDiscovered(true);
         webAppContext.setParentLoaderPriority(true);
-
-        // 添加jsp支持
-        webAppContext.addBean(new WebOperationControlPanel.JspStarter(webAppContext));
-        webAppContext.addServlet(JettyJspServlet.class, "*.jsp");
 
         // 添加一个全局过滤器
         FilterHolder filterHolder = new FilterHolder(new GlobalFilter());
@@ -137,30 +128,5 @@ public class WebOperationControlPanel {
             tmpDir += File.separator;
         }
         return tmpDir + "smart-config.jetty." + port + "." + System.currentTimeMillis();
-    }
-
-
-    public static class JspStarter extends AbstractLifeCycle implements ServletContextHandler.ServletContainerInitializerCaller {
-
-        JettyJasperInitializer sci;
-        ServletContextHandler context;
-
-        public JspStarter(ServletContextHandler context) {
-            this.sci = new JettyJasperInitializer();
-            this.context = context;
-            this.context.setAttribute("org.apache.tomcat.JarScanner", new StandardJarScanner());
-        }
-
-        @Override
-        protected void doStart() throws Exception {
-            ClassLoader old = Thread.currentThread().getContextClassLoader();
-            Thread.currentThread().setContextClassLoader(context.getClassLoader());
-            try {
-                sci.onStartup(null, context.getServletContext());
-                super.doStart();
-            } finally {
-                Thread.currentThread().setContextClassLoader(old);
-            }
-        }
     }
 }

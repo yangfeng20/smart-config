@@ -19,7 +19,6 @@ import java.util.List;
 public class AuthFilter implements Filter {
 
     private final List<String> notAuthUrl = Arrays.asList("/config/login", "/");
-    private final List<String> bizUrl = Arrays.asList("/list", "/release", "save");
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {

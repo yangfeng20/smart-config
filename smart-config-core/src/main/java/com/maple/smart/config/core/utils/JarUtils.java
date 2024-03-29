@@ -27,7 +27,7 @@ public class JarUtils {
      * 需要拷贝到临时运行目录的文件【仅拷贝web相关文件】
      */
     private static final List<String> webCpFileNames = Lists.newArrayList(
-            "static/**", "WEB-INF/**", "index.html", "login.html"
+            "static/**", "WEB-INF/**", "index.html"
     );
 
     public static List<Class<?>> loaderClassFromJar(String jarPath, String packagePath) throws ClassNotFoundException {
