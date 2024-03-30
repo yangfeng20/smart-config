@@ -4,10 +4,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.maple.smart.config.core</groupId>
-    <artifactId>smart-config-core</artifactId>
-    <version>1.0-SNAPSHOT</version>
-
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -18,9 +14,40 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
+
+    <groupId>io.github.yangfeng20</groupId>
+    <artifactId>smart-config-core</artifactId>
+    <version>1.0.0</version>
+    <name>smart-config</name>
+    <description>smart-config</description>
+    <url>https://github.com/yangfeng20/smart-config</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>yangfeng20</id>
+            <name>yangfeng20</name>
+            <email>2478341687@qq.com</email>
+            <roles>
+                <role>Project Manager</role>
+                <role>Architect</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>https://gitee.com/yangfeng20/aliyun-oss-spring-boot-starter.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:yangfeng20/smart-config.git</developerConnection>
+        <url>https://github.com/yangfeng20/smart-config</url>
+    </scm>
+
     <dependencies>
-
-
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
@@ -54,14 +81,14 @@
 
     </dependencies>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub OWNER Apache Maven Packages</name>
-            <!--OWNER替换为 github的用户名或你所属组织的名称；REPOSITORY替换为项目名称-->
-            <url>https://maven.pkg.github.com/yangfeng20/smart-config</url>
-        </repository>
-    </distributionManagement>
+    <!--<distributionManagement>-->
+    <!--    <repository>-->
+    <!--        <id>github</id>-->
+    <!--        <name>GitHub OWNER Apache Maven Packages</name>-->
+    <!--        &lt;!&ndash;OWNER替换为 github的用户名或你所属组织的名称；REPOSITORY替换为项目名称&ndash;&gt;-->
+    <!--        <url>https://maven.pkg.github.com/yangfeng20/smart-config</url>-->
+    <!--    </repository>-->
+    <!--</distributionManagement>-->
 
 
     <build>
@@ -84,19 +111,67 @@
         </resources>
 
         <plugins>
+            <!--   central发布插件    -->
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.4.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>yangfeng20</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
+                </configuration>
+            </plugin>
+            <!--源代码-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>2.2.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--   javadoc插件 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.3.2</version>
+                <configuration>
+                    <failOnError>false</failOnError>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
                         <goals>
                             <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
+            <!--签名验证-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <configuration>
+                    <keyname>yangfeng20</keyname>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
