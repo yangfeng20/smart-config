@@ -64,6 +64,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             return;
         }
 
+        // todo  ${bbb:222-${ccc}} 后面的key不能被关注，导致发布配置时，值没有更新
         String configKey = parseKey(field);
         if (configSubscriberMap.containsKey(configKey)) {
             configSubscriberMap.get(configKey).add(field);
@@ -84,14 +85,18 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
     public void subscribe(List<ConfigEntity> configEntityList) {
         configEntityList.forEach(configEntity -> {
             List<Field> fieldList = configSubscriberMap.get(configEntity.getKey());
-            // 没有观察者时，也更新发布状态
-            configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
             if (fieldList == null || fieldList.isEmpty()) {
-                // 当前配置没有字段观察者，下一个配置
+                // 当前配置没有字段观察者，下一个配置;没有观察者时，也更新发布状态
+                configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
                 return;
             }
-            // todo 未抛出异常，修改时间
-            this.propertyInject(configEntity, fieldList);
+            try {
+                this.propertyInject(configEntity, fieldList);
+                configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
+            } catch (Exception e) {
+                log.error("key [" + configEntity.getKey() + "] has problems " + e.getMessage(), e);
+                throw new SmartConfigApplicationException("key [" + configEntity.getKey() + "] has problems " + e.getMessage());
+            }
         });
 
         configListeners.forEach(configListener -> configListener.onChange(configEntityList));
