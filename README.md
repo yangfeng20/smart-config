@@ -2,7 +2,7 @@
 # Smart-Config
 
 智能配置：单体应用下的动态配置。
-主要用来解决在单体应用没有配置中心时，想要动态变更配置。
+主要用来解决在单体应用没有配置中心时，想要动态变更配置。可以理解为单机版的apollo
 
 ### 优势
 - 权限校验
@@ -10,8 +10,13 @@
 - webUi修改配置
 - 支持非SpringBoot应用
 - 无缝衔接`SpringBoot`应用
+- 支持结构化数据（json，集合，对象）
 - 轻量级无冗余第三方库
 - 内嵌轻量级jetty服务器
+- webUi支持中英文切换
+- 支持springboot多配置文件
+- 支持`spring.config.location`以及`spring.profiles.active`
+- 支持启动参数修改webUi端口以及配置描述推断
 
 
 
@@ -19,7 +24,7 @@
 
 ![示例](/images/img_1.png)
 
-![示例](/images/img.png)
+![示例](/images/img_2.png)
 
 
 ### 使用
@@ -49,8 +54,14 @@
    ```java
    public class AppConfig{
    
-   @Value("${configKey}")
-   private String value;
+      @Value("${configKey}")
+      private String value;
+      
+      @JsonValue("${list:[1]}")
+      private List<Integer> list;
+      
+      @JsonValue("${config.entity:{}}")
+      private XxxEntity entity; 
    
    } 
    ```
@@ -62,8 +73,10 @@
     public class App{
         public static void main(String[]args){
             SmartConfig smartConfig = new LocalFileConfig(6767, true);
-            // 类扫描路径，有@SmartValue的类，以及本地配置文件地址
-            smartConfig.init(Collections.singletonList("com.maple.config.test"), "application.properties");
+            List<String> list = new ArrayList<>();
+            list.add("com.maple.smart.config.test");
+            AbsConfigBootstrap bootstrap = new LocalConfigBootstrap(true, 6767,"classpath:application.properties", list);
+            bootstrap.init();
         }
     }   
     ```
@@ -71,28 +84,27 @@
    ```java
    public class AppConfig{
    
-   @SmartValue("配置key:默认值")
-   private static String config1;
+       @SmartValue("配置key:默认值")
+       private static String config1;
    
-   @SmartValue("biz.name:abc")
-   private static String bizName;
+       @SmartValue("biz.name:abc")
+       private static String bizName;
+   
+       @JsonValue("${list:[1]}")
+       private static List<Integer> list;
+      
+       @JsonValue("${config.entity:{}}")
+       private static XxxEntity entity; 
    }
    ```
    
 
 ### 注意点
 - Web-Ui默认端口：6767
-- SpringBoot应用@Value所在的对象不支持代理对象。
+- SpringBoot应用配置类被代理后请勿直接访问属性，而是通过getter访问
 - 非Spring应用仅支持静态变量。
 
 
-
 ### 后续计划
-- 页面优化体验
-- 支持json
-- 支持多类型value
 
-# todo
-1. 启动模型架构统一，启动方式不一致，没有模版
-2. 不支持list，json。
-3. 不同环境的配置文件。是否需要支持@Profile
+- 支持`${key1:${key2:defaultValue}` key2变更被关注
