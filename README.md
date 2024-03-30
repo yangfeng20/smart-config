@@ -33,9 +33,9 @@
 
 ```xml
 <dependency>
-  <groupId>com.maple.smart.config.core</groupId>
-  <artifactId>smart-config-core</artifactId>
-  <version>1.0-SNAPSHOT</version>
+   <groupId>io.github.yangfeng20</groupId>
+   <artifactId>smart-config-core</artifactId>
+   <version>1.0.0</version>
 </dependency>
 ```
 
