@@ -99,10 +99,12 @@ public class WebOperationControlPanel {
             inputStream = Files.newInputStream(Paths.get(jarPath));
         } else {
             // jar包 springboot环境
-            inputStream = WebOperationControlPanel.class.getClassLoader().getResourceAsStream(SmartConfigConstant.JAR_FILE_PATH);
+            String[] jarPathArr = classPath.getPath().split("\\.jar!/");
+            String jarPath = jarPathArr[jarPathArr.length - 1] + ".jar";
+            inputStream = WebOperationControlPanel.class.getClassLoader().getResourceAsStream(jarPath);
         }
         if (inputStream == null) {
-            throw new SmartConfigApplicationException("Failed to obtain the smart-config web environment jar. path:" + SmartConfigConstant.JAR_FILE_PATH);
+            throw new SmartConfigApplicationException("Failed to obtain the smart-config web environment jar. path:" + classPath);
         }
 
         // 构建临时目录文件夹名称
