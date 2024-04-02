@@ -1,9 +1,9 @@
 package com.maple.smart.config.core.boot;
 
-import com.maple.smart.config.core.model.ConfigEntity;
 import com.maple.smart.config.core.control.WebOperationControlPanel;
 import com.maple.smart.config.core.exp.SmartConfigApplicationException;
 import com.maple.smart.config.core.loader.ConfigLoader;
+import com.maple.smart.config.core.model.ConfigEntity;
 import com.maple.smart.config.core.repository.ConfigRepository;
 import com.maple.smart.config.core.subscription.ConfigSubscription;
 import lombok.Getter;

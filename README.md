@@ -108,3 +108,4 @@
 ### 后续计划
 
 - 支持`${key1:${key2:defaultValue}` key2变更被关注
+- spel支持

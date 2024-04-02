@@ -3,8 +3,8 @@ package com.maple.smart.config.core.subscription;
 import com.maple.smart.config.core.annotation.JsonValue;
 import com.maple.smart.config.core.annotation.SmartValue;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.Optional;
 
 /**
  * @author maple
@@ -20,15 +20,9 @@ public class LocalConfigSubscription extends AbsConfigSubscription {
     }
 
     @Override
-    protected String doParseKey(Field field) {
-        Annotation smartValue = field.getAnnotation(SmartValue.class);
-        Annotation jsonValue = field.getAnnotation(JsonValue.class);
-        if (smartValue != null) {
-            return resolveAnnotation(smartValue);
-        }
-        if (jsonValue != null) {
-            return resolveAnnotation(jsonValue);
-        }
-        return null;
+    protected String findFieldAnnotationValue(Field field) {
+        SmartValue smartValue = field.getAnnotation(SmartValue.class);
+        return smartValue != null ? smartValue.value() : Optional.ofNullable(field.getAnnotation(JsonValue.class))
+                .map(JsonValue::value).orElse(null);
     }
 }

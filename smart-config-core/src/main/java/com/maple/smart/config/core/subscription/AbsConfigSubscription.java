@@ -11,12 +11,13 @@ import com.maple.smart.config.core.model.ReleaseStatusEnum;
 import com.maple.smart.config.core.repository.ConfigRepository;
 import com.maple.smart.config.core.utils.ClassUtils;
 import com.maple.smart.config.core.utils.Lists;
+import com.maple.smart.config.core.utils.PlaceholderResolverUtils;
+import com.maple.smart.config.core.utils.spring.SpringPropertyPlaceholderHelper;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
@@ -64,21 +65,22 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             return;
         }
 
-        // todo  ${bbb:222-${ccc}} 后面的key不能被关注，导致发布配置时，值没有更新
-        String configKey = parseKey(field);
-        if (configSubscriberMap.containsKey(configKey)) {
-            configSubscriberMap.get(configKey).add(field);
-        } else {
-            configSubscriberMap.put(configKey, Lists.newArrayList(field));
-        }
-
-        configSubscriberObjMap.compute(configKey, (key, targetObjList) -> {
-            if (targetObjList != null) {
-                targetObjList.add(targetObj);
-                return targetObjList;
+        List<String> configKeyList = findAllKey(field);
+        for (String configKey : configKeyList) {
+            if (configSubscriberMap.containsKey(configKey)) {
+                configSubscriberMap.get(configKey).add(field);
+            } else {
+                configSubscriberMap.put(configKey, Lists.newArrayList(field));
             }
-            return Lists.newArrayList(targetObj);
-        });
+
+            configSubscriberObjMap.compute(configKey, (key, targetObjList) -> {
+                if (targetObjList != null) {
+                    targetObjList.add(targetObj);
+                    return targetObjList;
+                }
+                return Lists.newArrayList(targetObj);
+            });
+        }
     }
 
     @Override
@@ -109,7 +111,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
 
     @Override
     public void refresh(ConfigRepository configRepository) {
-        Map<String, ConfigEntity> configEntityMap = configRepository.resolvedPlaceholdersConfigList()
+        Map<String, ConfigEntity> configEntityMap = configRepository.configList()
                 .stream()
                 .collect(Collectors.toMap(ConfigEntity::getKey, Function.identity()));
         for (Map.Entry<String, List<Field>> entry : configSubscriberMap.entrySet()) {
@@ -142,21 +144,18 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
      */
     protected abstract boolean focus(Field field);
 
-
-    protected String parseKey(Field field) {
-
-        String configKey = doParseKey(field);
-        if (configKey == null || configKey.isEmpty()) {
-            throw new SmartConfigApplicationException(ClassUtils.getFullFieldName(field) + " configKey is null or empty");
-        }
-        return configKey;
+    /**
+     * 找到字段注解上的所有key
+     *
+     * @param field 注解字段
+     * @return keyList
+     */
+    private List<String> findAllKey(Field field) {
+        String str = findFieldAnnotationValue(field);
+        return PlaceholderResolverUtils.findAllKey(str);
     }
 
-    protected abstract String doParseKey(Field field);
-
-    protected String resolveAnnotation(Annotation annotation) {
-        return ClassUtils.resolveAnnotationKey(annotation);
-    }
+    protected abstract String findFieldAnnotationValue(Field field);
 
     public void propertyInject(Object bean) {
         this.configurationWrapperField(bean).stream()
@@ -164,8 +163,8 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                 // 过滤@Value；spring赋值
                 .filter(field -> !field.isAnnotationPresent(Value.class))
                 .forEach(field -> {
-                    String configKey = parseKey(field);
-                    ConfigEntity configEntity = Optional.ofNullable(configRepository.getConfigEntity(configKey))
+                    String configKey = PlaceholderResolverUtils.findAnyKey(findFieldAnnotationValue(field));
+                    ConfigEntity configEntity = Optional.ofNullable(configRepository.getOriginalConfigEntity(configKey))
                             .orElse(new ConfigEntity(configKey));
                     propertyInject(configEntity, Lists.newArrayList(field));
                 });
@@ -175,9 +174,9 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
      * 获取对象的所有字段，可能是包装字段
      * 当当前对象是@Configuration类时，spring会增强该类，代理了该类；返回原始父类的字段
      *
-     * @param bean 豆
+     * @param bean bean
      * @return {@link List}<{@link Field}>
-     * @see org.springframework.context.annotation.ConfigurationClassEnhancer$EnhancedConfiguration
+     * //* @see org.springframework.context.annotation.ConfigurationClassEnhancer$EnhancedConfiguration
      * @see SpringConfigSubscription#configurationWrapperField(Object)
      */
     protected List<Field> configurationWrapperField(Object bean) {
@@ -190,7 +189,8 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
         for (Field field : fieldList) {
             field.setAccessible(true);
             try {
-                Object fieldValue = resolveValue(field, configEntity.getValue());
+                String annotationValue = findFieldAnnotationValue(field);
+                Object fieldValue = resolveValue(field, annotationValue);
                 List<Object> fieldTargetObjList = getFocusObjListByKey(configEntity.getKey());
                 for (Object fieldTargetObj : fieldTargetObjList) {
                     if (fieldTargetObj == null) {
@@ -217,20 +217,13 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
         return field.isAnnotationPresent(SmartValue.class);
     }
 
-    protected String resolveFieldDefaultValue(Field field) {
-        Function<String, String> keyResolver = configRepository::getConfig;
-        String configValue = ClassUtils.resolveAnnotation(field.getAnnotation(SmartValue.class), keyResolver).getValue();
-        return configValue != null ? configValue : ClassUtils.resolveAnnotation(field.getAnnotation(JsonValue.class),
-                keyResolver).getValue();
-    }
-
-    protected Object resolveValue(Field field, String configValue) {
+    protected Object resolveValue(Field field, String annotationValue) {
         String fullFieldName = ClassUtils.getFullFieldName(field);
 
-        // 配置文件中当前字段key没有对应值，查看字段的直接上是否有默认值
-        if (configValue == null) {
-            configValue = resolveFieldDefaultValue(field);
-        }
+        // 解析默认值上可能存在的占位符
+        SpringPropertyPlaceholderHelper placeholderHelper = new SpringPropertyPlaceholderHelper("${",
+                "}", ":", false);
+        String configValue = placeholderHelper.replacePlaceholders(annotationValue, configRepository::getConfig);
 
         // 配置文件中当前字段key没有对应值，且字段的直接上没有默认值，抛出异常
         if (configValue == null) {

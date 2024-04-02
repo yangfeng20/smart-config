@@ -1,8 +1,8 @@
 package com.maple.smart.config.core.spring;
 
-import com.maple.smart.config.core.boot.SpringConfigBootstrap;
 import com.maple.smart.config.core.annotation.EnableSmartConfig;
 import com.maple.smart.config.core.boot.SmartConfigBootstrap;
+import com.maple.smart.config.core.boot.SpringConfigBootstrap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.SpringApplication;
@@ -58,8 +58,9 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
         }
 
         int webUiPort = enableSmartConfig.webUiPort();
-        if (environment.getProperty("smart.config.webui.port") != null) {
-            webUiPort = Integer.parseInt(environment.getProperty("smart.config.webui.port"));
+        String webuiPortStr = environment.getProperty("smart.config.webui.port");
+        if (webuiPortStr != null) {
+            webUiPort = Integer.parseInt(webuiPortStr);
         }
 
         log.debug("Smart-Config 加载配置 descInfer: {} webUiPort: {} configLocation: {}", descInfer, webUiPort, configLocation);

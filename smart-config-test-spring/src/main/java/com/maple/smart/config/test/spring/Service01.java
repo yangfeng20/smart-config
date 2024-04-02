@@ -27,13 +27,13 @@ import java.util.List;
 @Configuration
 public class Service01 {
 
-    @Value("${aa:true}")
-    private boolean aa;
+    //@Value("${aa:true}")
+    //private boolean aa;
 
-    @SmartValue("${aaa:111-${abc}}")
+    @SmartValue("test-${aaa:111-${abc}-${bdc:${bbb}}}")
     private String val1;
 
-    @SmartValue("${bbb:222-${ccc}}")
+    @SmartValue("${bbb}-${ccc}")
     private String val2;
 
     // Could not resolve placeholder 'abc' in value "${abc}"

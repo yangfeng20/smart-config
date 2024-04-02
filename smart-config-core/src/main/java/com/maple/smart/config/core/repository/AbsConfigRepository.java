@@ -3,7 +3,7 @@ package com.maple.smart.config.core.repository;
 import com.maple.smart.config.core.exp.SmartConfigApplicationException;
 import com.maple.smart.config.core.model.ConfigEntity;
 import com.maple.smart.config.core.subscription.ConfigSubscription;
-import com.maple.smart.config.core.utils.PlaceholderResolver;
+import com.maple.smart.config.core.utils.PlaceholderResolverUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -33,7 +33,7 @@ public abstract class AbsConfigRepository implements ConfigRepository {
     @Override
     public Collection<ConfigEntity> resolvedPlaceholdersConfigList() {
         return configEntityMap.values().stream()
-                .peek(configEntity -> configEntity.setValue(this.resolvePlaceholders(configEntity.getValue())))
+                .peek(configEntity -> configEntity.setValue(PlaceholderResolverUtils.resolvePlaceholders(configEntity.getValue(), this::getConfig)))
                 .collect(Collectors.toList());
 
     }
@@ -44,7 +44,6 @@ public abstract class AbsConfigRepository implements ConfigRepository {
             throw new SmartConfigApplicationException("config key is not empty");
         }
 
-        boolean containsKey = configEntityMap.containsKey(configEntity.getKey());
         configEntityMap.compute(configEntity.getKey(), (configKey, oldConfigEntity) -> {
             if (oldConfigEntity == null) {
                 configEntity.setCreateDate(new Date());
@@ -90,10 +89,7 @@ public abstract class AbsConfigRepository implements ConfigRepository {
 
     @Override
     public String resolvePlaceholders(String text) {
-        return PlaceholderResolver.defResolveText(text, key -> {
-            ConfigEntity configEntity = configEntityMap.get(key);
-            return configEntity == null ? key : configEntity.getValue();
-        });
+        return PlaceholderResolverUtils.resolvePlaceholders(text, this::getConfig);
     }
 
     @Override

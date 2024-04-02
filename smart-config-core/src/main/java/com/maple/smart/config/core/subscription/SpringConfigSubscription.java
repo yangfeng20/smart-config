@@ -1,15 +1,12 @@
 package com.maple.smart.config.core.subscription;
 
-import com.maple.smart.config.core.repository.ConfigRepository;
-import com.maple.smart.config.core.spring.SmartConfigSpringContext;
-import com.maple.smart.config.core.utils.ClassUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author maple
@@ -25,14 +22,12 @@ public class SpringConfigSubscription extends LocalConfigSubscription {
     }
 
     @Override
-    protected String doParseKey(Field field) {
-
-        String key = super.doParseKey(field);
-        if (key != null) {
-            return key;
+    protected String findFieldAnnotationValue(Field field) {
+        String annotationValue = super.findFieldAnnotationValue(field);
+        if (annotationValue != null) {
+            return annotationValue;
         }
-        Annotation value = field.getAnnotation(Value.class);
-        return resolveAnnotation(value);
+        return Optional.ofNullable(field.getAnnotation(Value.class)).map(Value::value).orElse(null);
     }
 
     @Override
@@ -58,15 +53,5 @@ public class SpringConfigSubscription extends LocalConfigSubscription {
     @Override
     protected boolean isSimpleTypeAnnotation(Field field) {
         return super.isSimpleTypeAnnotation(field) || field.isAnnotationPresent(Value.class);
-    }
-
-    @Override
-    protected String resolveFieldDefaultValue(Field field) {
-        String configValue = super.resolveFieldDefaultValue(field);
-        if (configValue != null) return configValue;
-
-        ConfigRepository configRepository = SmartConfigSpringContext.getBean(ConfigRepository.class);
-        return ClassUtils.resolveAnnotation(field.getAnnotation(Value.class),
-                configRepository::getConfig).getValue();
     }
 }

@@ -1,24 +1,19 @@
 package com.maple.smart.config.core.utils;
 
 import com.maple.smart.config.core.exp.SmartConfigApplicationException;
-import com.maple.smart.config.core.model.Pair;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * @author maple
@@ -102,43 +97,6 @@ public class ClassUtils {
             }
         }
         return classes;
-    }
-
-    public static String resolveAnnotationKey(Annotation annotation) {
-        return resolveAnnotation(annotation, null).getKey();
-
-    }
-
-    public static Pair<String, String> resolveAnnotation(Annotation annotation, Function<String, String> keyResolver) {
-        if (annotation == null) {
-            return new Pair<>(null, null);
-        }
-        Class<? extends Annotation> annotationClazz = annotation.annotationType();
-        String annotationValue;
-        try {
-            Method annotationValueMethod = annotationClazz.getDeclaredMethod("value");
-            annotationValue = (String) annotationValueMethod.invoke(annotation);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            throw new SmartConfigApplicationException(e);
-        }
-
-        Pair<Boolean, Pair<Integer, Integer>> existPlaceholderAndIndexPair = PlaceholderResolver.containsSimplePlaceholder(annotationValue);
-        if (!existPlaceholderAndIndexPair.getKey()) {
-            return new Pair<>(null, null);
-        }
-        Pair<Integer, Integer> indexPair = existPlaceholderAndIndexPair.getValue();
-        String notExistPlaceholderText = annotationValue.substring(indexPair.getKey(), indexPair.getValue());
-        String[] keyAndDefaultValArr = notExistPlaceholderText.split(":", 2);
-        if (keyAndDefaultValArr.length == 1) {
-            return new Pair<>(keyAndDefaultValArr[0], null);
-        }
-
-        // 解析默认值中可能存在的占位符
-        String defaultValue = keyAndDefaultValArr[1];
-        if (keyResolver != null) {
-            defaultValue = PlaceholderResolver.defResolveText(defaultValue, keyResolver);
-        }
-        return new Pair<>(keyAndDefaultValArr[0], defaultValue);
     }
 
     public static String getFullFieldName(@NonNull Field field) {
