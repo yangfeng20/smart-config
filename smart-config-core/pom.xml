@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
 
         <!--编码字符集-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -17,7 +17,7 @@
 
     <groupId>io.github.yangfeng20</groupId>
     <artifactId>smart-config-core</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <name>smart-config</name>
     <description>smart-config</description>
     <url>https://github.com/yangfeng20/smart-config</url>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
-            <version>9.4.44.v20210927</version>
+            <version>11.0.20</version>
         </dependency>
 
         <dependency>

@@ -5,11 +5,13 @@ import com.maple.smart.config.core.boot.SmartConfigBootstrap;
 import com.maple.smart.config.core.boot.SpringConfigBootstrap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringApplicationRunListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 
+import java.time.Duration;
 import java.util.Collections;
 
 /**
@@ -26,7 +28,7 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
 
     private final EnableSmartConfig enableSmartConfig;
 
-
+    @SuppressWarnings("unused")
     public SmartConfigSpringRunListener(SpringApplication application, String[] args) {
         Class<?> mainClass = application.getMainApplicationClass();
         enableSmartConfig = mainClass.getAnnotation(EnableSmartConfig.class);
@@ -101,5 +103,17 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
     @Override
     public void failed(ConfigurableApplicationContext context, Throwable exception) {
 
+    }
+
+
+    // 适配 SpringBoot 3
+    @SuppressWarnings("all")
+    public void environmentPrepared(ConfigurableBootstrapContext bootstrapContext, ConfigurableEnvironment environment) {
+        this.environmentPrepared(environment);
+    }
+
+    @SuppressWarnings("all")
+    public void started(ConfigurableApplicationContext context, Duration timeTaken) {
+        this.started(context);
     }
 }
