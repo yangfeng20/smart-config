@@ -35,7 +35,7 @@
 <dependency>
    <groupId>io.github.yangfeng20</groupId>
    <artifactId>smart-config-core</artifactId>
-   <version>1.0.0</version>
+   <version>1.0.1</version>
 </dependency>
 ```
 
