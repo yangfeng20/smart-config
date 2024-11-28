@@ -17,7 +17,7 @@
 
     <groupId>io.github.yangfeng20</groupId>
     <artifactId>smart-config-core</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <name>smart-config</name>
     <description>smart-config</description>
     <url>https://github.com/yangfeng20/smart-config</url>

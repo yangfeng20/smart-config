@@ -10,6 +10,8 @@ import org.springframework.boot.SpringApplicationRunListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Collections;
 
 /**
@@ -29,7 +31,35 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
 
     public SmartConfigSpringRunListener(SpringApplication application, String[] args) {
         Class<?> mainClass = application.getMainApplicationClass();
-        enableSmartConfig = mainClass.getAnnotation(EnableSmartConfig.class);
+        EnableSmartConfig mainEnableSmartConfig = mainClass.getAnnotation(EnableSmartConfig.class);
+        if (mainEnableSmartConfig == null) {
+            mark:
+            for (Annotation annotation : mainClass.getDeclaredAnnotations()) {
+                // 当前注解所有属性字段
+                Method[] annotationProperties = annotation.annotationType().getDeclaredMethods();
+                for (Method annotationProperty : annotationProperties) {
+                    try {
+                        Object invoke = annotationProperty.invoke(annotation);
+                        if (invoke.getClass().isArray()) {
+                            for (Object o : (Object[]) invoke) {
+                                if (o instanceof Class && ((Class<?>) o).isAnnotationPresent(EnableSmartConfig.class)) {
+                                    mainEnableSmartConfig = ((Class<?>) o).getAnnotation(EnableSmartConfig.class);
+                                    break mark;
+                                }
+                            }
+                        } else if (invoke instanceof Class && ((Class<?>) invoke).isAnnotationPresent(EnableSmartConfig.class)) {
+                            mainEnableSmartConfig = ((Class<?>) invoke).getAnnotation(EnableSmartConfig.class);
+                            break mark;
+                        }
+                    } catch (Throwable ignore) {
+                    }
+                }
+            }
+        }
+        if (mainEnableSmartConfig == null) {
+            throw new IllegalArgumentException("EnableSmartConfig注解不存在，请检查");
+        }
+        enableSmartConfig = mainEnableSmartConfig;
     }
 
     @Override
