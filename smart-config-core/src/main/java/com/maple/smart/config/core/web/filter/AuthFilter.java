@@ -1,6 +1,7 @@
 package com.maple.smart.config.core.web.filter;
 
-import com.alibaba.fastjson.JSONObject;
+import com.maple.smart.config.core.infrastructure.json.JSONFacade;
+import com.maple.smart.config.core.infrastructure.json.JsonObject;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -47,10 +48,10 @@ public class AuthFilter implements Filter {
     private boolean authHandler(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         HttpSession session = req.getSession(false);
         if (session == null) {
-            JSONObject response = new JSONObject();
+            JsonObject response = JSONFacade.createJsonObject();
             response.put("code", 401);
             resp.setContentType("application/json;charset=utf-8");
-            resp.getWriter().write(response.toJSONString());
+            resp.getWriter().write(response.toJsonStr());
             return true;
         }
 

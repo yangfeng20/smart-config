@@ -1,6 +1,6 @@
 package com.maple.smart.config.core.listener;
 
-import com.alibaba.fastjson.JSON;
+import com.maple.smart.config.core.infrastructure.json.JSONFacade;
 import com.maple.smart.config.core.model.ConfigEntity;
 import com.maple.smart.config.core.subscription.ConfigSubscription;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class DefaultConfigListener implements ConfigListener {
 
     @Override
     public void onChange(Collection<ConfigEntity> changeConfigEntityList) {
-        log.info("Repository release; changeList:{}", JSON.toJSON(changeConfigEntityList));
+        log.info("Repository release; changeList:{}", JSONFacade.toJsonStr(changeConfigEntityList));
     }
 
     @Override

@@ -1,9 +1,9 @@
 package com.maple.smart.config.core.subscription;
 
-import com.alibaba.fastjson.JSON;
 import com.maple.smart.config.core.annotation.JsonValue;
 import com.maple.smart.config.core.annotation.SmartValue;
 import com.maple.smart.config.core.exp.SmartConfigApplicationException;
+import com.maple.smart.config.core.infrastructure.json.JSONFacade;
 import com.maple.smart.config.core.inject.PropertyInject;
 import com.maple.smart.config.core.listener.ConfigListener;
 import com.maple.smart.config.core.model.ConfigEntity;
@@ -96,7 +96,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                 this.propertyInject(configEntity, fieldList);
                 configEntity.setStatus(ReleaseStatusEnum.RELEASE.getCode());
             } catch (Exception e) {
-                log.error("key [" + configEntity.getKey() + "] has problems " + e.getMessage(), e);
+                log.error("key [{}] has problems {}", configEntity.getKey(), e.getMessage(), e);
                 throw new SmartConfigApplicationException("key [" + configEntity.getKey() + "] has problems " + e.getMessage());
             }
         });
@@ -157,6 +157,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
 
     protected abstract String findFieldAnnotationValue(Field field);
 
+    @Override
     public void propertyInject(Object bean) {
         this.configurationWrapperField(bean).stream()
                 .filter(this::focus)
@@ -259,7 +260,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             }
 
             // 使用@Value 或者 @SmartValue 来进行json的value数据
-            if (Integer.parseInt(JSON.VERSION.split("\\.")[2]) >= 60 && JSON.isValid(configValue)) {
+            if (JSONFacade.isValid(configValue)) {
                 throw new SmartConfigApplicationException(fullFieldName +
                         " @Value or @SmartValue not support json,please use @JsonValue");
             }
@@ -277,12 +278,12 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                         " @JsonValue not support String,please use @Value or @SmartValue");
             }
 
-            // 不是有效的json格式，阿里巴巴的parseObject也能解析，但可能导致数据不准确
-            if (Integer.parseInt(JSON.VERSION.split("\\.")[2]) >= 60 && !JSON.isValid(configValue)) {
-                log.warn("The configuration value associated with the [" + fullFieldName
-                        + "] field is not a valid json format, and it is possible that the field is causing incorrect data");
+            // 不是有效的json格式，parseObject也能解析，但可能导致数据不准确
+            if (!JSONFacade.isValid(configValue)) {
+                log.warn("The configuration value associated with the [{}] field is not a valid json format," +
+                        " and it is possible that the field is causing incorrect data", fullFieldName);
             }
-            return JSON.parseObject(configValue, fieldGenericType);
+            return JSONFacade.parseObject(configValue, fieldGenericType);
         }
 
         throw new SmartConfigApplicationException("The current field is not concerned, please refer to" +
