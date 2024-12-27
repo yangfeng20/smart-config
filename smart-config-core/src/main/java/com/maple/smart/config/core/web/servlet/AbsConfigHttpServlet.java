@@ -1,8 +1,9 @@
 package com.maple.smart.config.core.web.servlet;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.maple.smart.config.core.exp.SmartConfigApplicationException;
+import com.maple.smart.config.core.infrastructure.json.JSONFacade;
+import com.maple.smart.config.core.infrastructure.json.JsonObject;
 import com.maple.smart.config.core.model.ConfigEntity;
 import com.maple.smart.config.core.model.ConfigVO;
 import com.maple.smart.config.core.model.ReleaseStatusEnum;
@@ -54,7 +55,7 @@ public abstract class AbsConfigHttpServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Object data = null;
-        JSONObject response = new JSONObject();
+        JsonObject response = JSONFacade.createJsonObject();
         response.put("code", 200);
         response.put("message", "success");
         try {
@@ -81,16 +82,16 @@ public abstract class AbsConfigHttpServlet extends HttpServlet {
         }
         response.put("data", data);
         resp.setContentType("application/json;charset=utf-8");
-        resp.getWriter().write(response.toJSONString());
+        resp.getWriter().write(response.toJsonStr());
     }
 
     private void login(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         Object username = generateSha256(configRepository.getConfig("smart.username"));
         Object pwd = generateSha256(configRepository.getConfig("smart.password"));
 
-        JSONObject loginParam = getJsonData(req, JSONObject.class);
-        String usernameParam = loginParam.getString("username");
-        String pwdParam = loginParam.getString("pwd");
+        JsonNode loginParam = getJsonData(req, JsonNode.class);
+        String usernameParam = loginParam.get("username").asText();
+        String pwdParam = loginParam.get("pwd").asText();
 
         if (Objects.equals(usernameParam, username) && Objects.equals(pwdParam, pwd)) {
             // 登录成功
@@ -111,7 +112,7 @@ public abstract class AbsConfigHttpServlet extends HttpServlet {
             sb.append(line);
         }
 
-        return JSON.parseObject(sb.toString(), clazz);
+        return JSONFacade.parseObject(sb.toString(), clazz);
     }
 
     private String generateSha256(String data) {
