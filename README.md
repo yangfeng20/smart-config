@@ -35,7 +35,15 @@
 <dependency>
    <groupId>io.github.yangfeng20</groupId>
    <artifactId>smart-config-core</artifactId>
-   <version>1.0.1</version>
+   <version>1.0.3</version>
+</dependency>
+```
+- springboot3需要做单独的代码兼容，所以版本独立发布。如果使用的是springboot3，请在正常版本后添加[-springboot3];例如：
+```xml
+<dependency>
+   <groupId>io.github.yangfeng20</groupId>
+   <artifactId>smart-config-core</artifactId>
+   <version>1.0.3-springboot3</version>
 </dependency>
 ```
 
