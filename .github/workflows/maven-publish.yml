@@ -1,0 +1,50 @@
+name: Maven Build and Publish
+
+on:
+  push:
+    tags:
+      - 'v*'  # 只有推送带有 'v' 前缀的标签时触发工作流
+
+jobs:
+  build:
+    if: github.actor == 'yangfeng20'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build and publish
+        run: mvn clean deploy --settings .github/maven-settings.xml -DskipTests=true
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub Release
+        uses: gh-actions/create-release@v1.1.1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          body: |
+            Release notes here
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
