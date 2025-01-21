@@ -43,7 +43,7 @@ public class WebOperationControlPanel {
 
         try {
             URL webappResourceRootPath = ClassUtils.getClassPathURLByClass(WebOperationControlPanel.class);
-            if (webappResourceRootPath.getProtocol().equals("jar")) {
+            if ("jar".equals(webappResourceRootPath.getProtocol())) {
                 webappResourceRootPath = buildWebTempRumEnv(port, webappResourceRootPath);
             }
             webAppContext.setBaseResource(Resource.newResource(webappResourceRootPath));
@@ -89,13 +89,13 @@ public class WebOperationControlPanel {
             // 前面条件为非springboot环境，后面条件是maven仓库【未打包】
             String jarOriginalPath = ClassUtils.getClassPathURLByClass(WebOperationControlPanel.class).getPath();
             String jarPath;
-            if (File.separator.equals("/")) {
+            if ("/".equals(File.separator)) {
                 jarPath = jarOriginalPath.replace("file:", "").replace("!/", "");
             } else {
                 // windows
                 jarPath = jarOriginalPath.replace("file:/", "").replace("!/", "");
             }
-            jarPath = URLDecoder.decode(jarPath, StandardCharsets.UTF_8.name());
+            jarPath = URLDecoder.decode(jarPath, StandardCharsets.UTF_8);
             inputStream = Files.newInputStream(Paths.get(jarPath));
         } else {
             // jar包 springboot环境
