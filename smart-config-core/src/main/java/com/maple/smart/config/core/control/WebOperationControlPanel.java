@@ -17,6 +17,7 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import jakarta.servlet.DispatcherType;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -100,7 +101,15 @@ public class WebOperationControlPanel {
         } else {
             // jar包 springboot环境
             String[] jarPathArr = classPath.getPath().split("\\.jar!/");
-            String jarPath = jarPathArr[jarPathArr.length - 1] + ".jar";
+            String jarPath;
+            // nested:/D:/Program%20Dev%20Kit/JDK/jdk-17.0.11+9/bin/test-1.0-SNAPSHOT.jar/!BOOT-INF/lib/smart-config-core-1.0.3-springboot3
+            if (classPath.getPath().startsWith("nested:/")) {
+                // 兼容java17
+                jarPath = splitLast(jarPathArr[0], "\\.jar/!") + ".jar";
+            } else {
+                // java8
+                jarPath = jarPathArr[jarPathArr.length - 1] + ".jar";
+            }
             inputStream = WebOperationControlPanel.class.getClassLoader().getResourceAsStream(jarPath);
         }
         if (inputStream == null) {
@@ -130,5 +139,10 @@ public class WebOperationControlPanel {
             tmpDir += File.separator;
         }
         return tmpDir + "smart-config.jetty." + port + "." + System.currentTimeMillis();
+    }
+
+    private String splitLast(String str, String separator) {
+        String[] split = str.split(separator);
+        return split[split.length - 1];
     }
 }
