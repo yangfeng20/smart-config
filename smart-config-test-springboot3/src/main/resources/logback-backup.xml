@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns="http://ch.qos.logback/xml/ns/logback"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://ch.qos.logback/xml/ns/logback
+                https://raw.githubusercontent.com/enricopulatzo/logback-XSD/master/src/main/xsd/logback.xsd">
+    <contextName>smart-config</contextName>
+
+    <!-- 非springboot环境输出格式-->
+    <property name="base.pattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
+    <!--springboot环境输出格式(包含色彩)-->
+    <property name="spring.pattern"
+              value="${CONSOLE_LOG_PATTERN:-%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+
+    <!-- 当前能够区分springboot应用和非springboot应用。但是日志会打印logback初始化错误;不支持【 Ignoring unknown property [springProperty] in [ch.qos.logback.classic.LoggerContext]】-->
+    <!-- 在springboot中中他是能够后置识别到的，但是由于当前配置文件在springboot前加载，所以会打印warn和error；参考：ch.qos.logback.core.util.StatusPrinter.printInCaseOfErrorsOrWarnings(ch.qos.logback.core.Context, long)-->
+    <!--springboot应用获取应用名，设置过应用名使用彩色打印方案-->
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="default-app"/>
+
+
+    <!--定义过appName并且appName不等于default-app时，定义彩色输出的规则-->
+    <if condition='isDefined("appName") &amp;&amp; !property("appName").equals("default-app")'>
+        <then>
+            <!-- 定义彩色输出的编码 -->
+            <conversionRule conversionWord="clr"
+                            converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+            <conversionRule conversionWord="wEx"
+                            converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+        </then>
+    </if>
+
+
+    <!-- 控制台输出格式 -->
+    <if condition='isDefined("appName") &amp;&amp; !property("appName").equals("default-app")'>
+        <then>
+            <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder>
+                    <pattern>${spring.pattern}</pattern>
+                </encoder>
+            </appender>
+        </then>
+        <else>
+            <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder>
+                    <pattern>${base.pattern}</pattern>
+                </encoder>
+            </appender>
+        </else>
+    </if>
+
+
+    <!-- 根记录器 -->
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <!--smart-config记录器-->
+    <logger name="com.maple.config.core" level="info" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+</configuration>
