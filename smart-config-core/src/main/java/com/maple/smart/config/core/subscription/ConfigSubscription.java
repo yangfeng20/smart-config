@@ -39,7 +39,7 @@ public interface ConfigSubscription {
     void addListener(ConfigListener configListener);
 
     /**
-     * 刷新
+     * 将配置仓库中所有的配置刷新到配置订阅者（字段）中
      *
      * @param configRepository 配置存储库
      */
