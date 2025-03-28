@@ -13,6 +13,7 @@ import com.maple.smart.config.core.utils.ClassUtils;
 import com.maple.smart.config.core.utils.Lists;
 import com.maple.smart.config.core.utils.PlaceholderResolverUtils;
 import com.maple.smart.config.core.utils.spring.SpringPropertyPlaceholderHelper;
+import com.maple.smart.config.core.utils.spring.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,13 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
     protected Map<String, List<Field>> configSubscriberMap = new HashMap<>(16);
 
     protected Map<String, List<Object>> configSubscriberObjMap = new HashMap<>(16);
+
+    /**
+     * 配置默认值回显
+     */
+    protected boolean defaultValEcho;
+
+    protected List<ConfigEntity> defaultValEchoConfigList = new ArrayList<>();
 
 
     @Override
@@ -207,6 +215,9 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                     if (field.getDeclaringClass().isAssignableFrom(fieldTargetObj.getClass())) {
                         field.set(fieldTargetObj, fieldValue);
                     }
+                    if (defaultValEcho && fieldValue != null && defaultValConfig(configEntity)) {
+                        defaultValEchoConfigList.add(configEntity);
+                    }
                 }
             } catch (Exception e) {
                 throw new SmartConfigApplicationException(ClassUtils.getFullFieldName(field) + " resolveValue or inject error", e);
@@ -288,5 +299,18 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
 
         throw new SmartConfigApplicationException("The current field is not concerned, please refer to" +
                 " [com.maple.config.core.subscription.AbsConfigSubscription.focus]");
+    }
+
+
+    private boolean defaultValConfig(ConfigEntity configEntity) {
+        if (configEntity == null || StringUtils.isEmpty(configEntity.getKey())) {
+            return false;
+        }
+
+        return configEntity.getValue() == null && configEntity.getDesc() == null
+                && configEntity.getStatus() == null
+                && configEntity.getCreateDate() == null
+                && configEntity.getUpdateDate() == null
+                && !Boolean.TRUE.equals(configEntity.isDurable());
     }
 }

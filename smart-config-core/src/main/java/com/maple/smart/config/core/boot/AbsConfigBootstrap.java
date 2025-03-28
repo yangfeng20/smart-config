@@ -69,6 +69,7 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
      */
     public abstract void loaderSpiImpl();
 
+    @Override
     public void init() {
         log.info("Smart-Config init begin");
         loaderSpiImpl();
