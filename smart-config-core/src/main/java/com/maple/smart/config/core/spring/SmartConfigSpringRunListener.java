@@ -95,8 +95,14 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
             webUiPort = Integer.parseInt(webuiPortStr);
         }
 
-        log.debug("Smart-Config 加载配置 descInfer: {} webUiPort: {} configLocation: {}", descInfer, webUiPort, configLocation);
-        smartConfigBootstrap = new SpringConfigBootstrap(descInfer, webUiPort, configLocation, Collections.emptyList());
+        boolean defaultValEcho = enableSmartConfig.defaultValEcho();
+        if (environment.getProperty("smart.config.default.echo") != null) {
+            defaultValEcho = Boolean.parseBoolean(environment.getProperty("smart.config.default.echo"));
+        }
+
+        log.debug("Smart-Config 加载配置 descInfer: {} webUiPort: {} configLocation: {} defaultValEcho:{}",
+                descInfer, webUiPort, configLocation, defaultValEcho);
+        smartConfigBootstrap = new SpringConfigBootstrap(descInfer, defaultValEcho, webUiPort, configLocation, Collections.emptyList());
         smartConfigBootstrap.init();
     }
 

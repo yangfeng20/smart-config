@@ -16,8 +16,8 @@ import java.util.List;
 
 public class SpringConfigBootstrap extends AbsConfigBootstrap {
 
-    public SpringConfigBootstrap(boolean descInfer, int webUiPort, String localConfigPath, List<String> packagePathList) {
-        super(descInfer, webUiPort, localConfigPath, packagePathList);
+    public SpringConfigBootstrap(boolean descInfer, boolean defaultValEcho, int webUiPort, String localConfigPath, List<String> packagePathList) {
+        super(descInfer, webUiPort, localConfigPath, packagePathList, defaultValEcho);
     }
 
     @Override
@@ -38,6 +38,7 @@ public class SpringConfigBootstrap extends AbsConfigBootstrap {
         SpringFactoriesLoader.loadFactories(ConfigSubscription.class, LocalConfigBootstrap.class.getClassLoader()).forEach(configSubscription -> {
             this.configSubscription = configSubscription;
             this.configSubscription.setConfigRepository(this.configRepository);
+            this.configSubscription.setDefaultValEcho(defaultValEcho);
             this.configRepository.setSubscription(configSubscription);
         });
 
@@ -52,6 +53,8 @@ public class SpringConfigBootstrap extends AbsConfigBootstrap {
     @Override
     public void refreshConfig() {
         // spring应用不需要手动刷新（触发字段赋值）；在beanPostProcessor中处理了
+        configSubscription.refresh(configRepository);
+        // todo 这里导致无法回显，重复刷新会有问题吗？有问题件，要改造
         if (!started) {
             startWebUi();
             started = true;

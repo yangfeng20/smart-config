@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 
 @RestController
-@EnableSmartConfig(descInfer = true)
+@EnableSmartConfig(descInfer = true, defaultValEcho = true)
 @EnableAspectJAutoProxy
 @SpringBootApplication
 public class TestSpringBoot3Application {
@@ -33,6 +33,12 @@ public class TestSpringBoot3Application {
 
     @JsonValue("${main.test02}")
     private Object test02;
+
+    @SmartValue("${key:val1:aaaa}")
+    private String test03;
+
+    @JsonValue("${key-json:{}}")
+    private Object test04;
 
 
     public static void main(String[] args) throws Exception {
