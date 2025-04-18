@@ -27,6 +27,11 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
     protected final boolean descInfer;
 
     /**
+     * 配置描述推断
+     */
+    protected final boolean defaultValEcho;
+
+    /**
      * WebUI端口
      */
     protected int webUiPort;
@@ -60,6 +65,15 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
         this.webUiPort = webUiPort;
         this.localConfigPath = localConfigPath;
         this.packagePathList = packagePathList;
+        this.defaultValEcho = false;
+    }
+
+    public AbsConfigBootstrap(boolean descInfer, int webUiPort, String localConfigPath, List<String> packagePathList, boolean defaultValEcho) {
+        this.descInfer = descInfer;
+        this.webUiPort = webUiPort;
+        this.localConfigPath = localConfigPath;
+        this.packagePathList = packagePathList;
+        this.defaultValEcho = defaultValEcho;
     }
 
 

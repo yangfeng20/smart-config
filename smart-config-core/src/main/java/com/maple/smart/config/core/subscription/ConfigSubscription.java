@@ -68,4 +68,6 @@ public interface ConfigSubscription {
     ConfigRepository getConfigRepository();
 
     void setConfigRepository(ConfigRepository configRepository);
+
+    void setDefaultValEcho(boolean defaultValEcho);
 }

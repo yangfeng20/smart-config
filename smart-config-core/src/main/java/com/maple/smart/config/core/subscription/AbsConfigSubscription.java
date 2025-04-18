@@ -50,6 +50,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
     /**
      * 配置默认值回显
      */
+    @Setter
     protected boolean defaultValEcho;
 
     protected List<ConfigEntity> defaultValEchoConfigList = new ArrayList<>();
@@ -117,6 +118,12 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
         return configSubscriberObjMap.get(key);
     }
 
+    /**
+     * 将配置仓库中所有的配置刷新到配置订阅者（字段）中
+     * 调用时期，启动的最后阶段
+     *
+     * @param configRepository 配置存储库
+     */
     @Override
     public void refresh(ConfigRepository configRepository) {
         Map<String, ConfigEntity> configEntityMap = configRepository.configList()
@@ -130,6 +137,12 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             ConfigEntity configEntity = Optional.ofNullable(configEntityMap.get(configKey)).orElse(new ConfigEntity(configKey));
             this.propertyInject(configEntity, focusFieldList);
         }
+
+        // 默认值回显
+        if (!defaultValEcho && defaultValEchoConfigList.isEmpty()) {
+            return;
+        }
+        configRepository.loader(defaultValEchoConfigList);
     }
 
     @Override
@@ -170,6 +183,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
         this.configurationWrapperField(bean).stream()
                 .filter(this::focus)
                 // 过滤@Value；spring赋值
+                // todo @Value无法支持默认值回显到web控制台
                 .filter(field -> !field.isAnnotationPresent(Value.class))
                 .forEach(field -> {
                     String configKey = PlaceholderResolverUtils.findAnyKey(findFieldAnnotationValue(field));
@@ -216,6 +230,8 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                         field.set(fieldTargetObj, fieldValue);
                     }
                     if (defaultValEcho && fieldValue != null && defaultValConfig(configEntity)) {
+                        configEntity.setValue(annotationValue);
+                        configEntity.setDesc("代码默认值回显");
                         defaultValEchoConfigList.add(configEntity);
                     }
                 }
@@ -302,6 +318,13 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
     }
 
 
+    /**
+     * 是否为默认值配置
+     * 即 配置实体只有key有值
+     *
+     * @param configEntity Config 实体
+     * @return boolean
+     */
     private boolean defaultValConfig(ConfigEntity configEntity) {
         if (configEntity == null || StringUtils.isEmpty(configEntity.getKey())) {
             return false;

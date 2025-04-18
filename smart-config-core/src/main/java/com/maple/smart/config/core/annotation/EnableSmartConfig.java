@@ -56,4 +56,23 @@ public @interface EnableSmartConfig {
      * @return 端口
      */
     int webUiPort() default 6767;
+
+    /**
+     * 默认值回显
+     * <p></p>
+     * 代码中使用注解引用的key，在配置文件中没有指定value。而是在代码中使用[:]指定默认值
+     * 例如：<pre>{@code
+     * @SmartValue("${key:defaultVal}")
+     * private String val;
+     *
+     * @JsonValue("${json-key:{}}")
+     * private String jsonVal;
+     * }<pre>
+     * 如果开启回显，最终 `key` `json-key` 会在webui中回显，并展示默认值
+     * <p></p>
+     * 启动参数方式
+     * -Dsmart.config.default.echo=true
+     * @return 是否开启
+     */
+    boolean defaultValEcho() default false;
 }
