@@ -127,10 +127,21 @@
    ```
    
 
-### 注意点
+### 注意
 - Web-Ui默认端口：6767
 - SpringBoot应用配置类被代理后请勿直接访问属性，而是通过getter访问
 - 非Spring应用仅支持静态变量。
+- 默认值回显开启时，如果key有两个默认值，即在代码中使用直接使用注解引用key，并且在配置文件中不存在。
+  ```java
+    @JsonValue("${list:[]}")
+    public List<Integer> list1;
+  
+    @JsonValue("${list:[1,2,3]}")
+    public List<Integer> list2;
+   ```
+    - webui中显示的值为最后一次赋值的默认值，这个顺序为容器决定
+    - 多个默认值不建议使用默认值回显功能，可能导致webui展示与代码中默认值不一致
+- `@Value`暂不支持默认值回显，请使用`@JsonValue`或者`@SmartValue`
 
 
 ### 后续计划
@@ -139,3 +150,4 @@
 - spel支持
 - 环境变量以及jvm参数数据源支持
 - 导出配置（最好格式不变）
+- yaml格式文件支持
