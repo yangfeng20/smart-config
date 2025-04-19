@@ -213,7 +213,8 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             field.setAccessible(true);
             try {
                 String annotationValue = findFieldAnnotationValue(field);
-                Object fieldValue = resolveValue(field, annotationValue);
+                String configValue = resolveValueStr(field, annotationValue);
+                Object fieldValue = toFieldType(field, configValue);
                 List<Object> fieldTargetObjList = getFocusObjListByKey(configEntity.getKey());
                 for (Object fieldTargetObj : fieldTargetObjList) {
                     if (fieldTargetObj == null) {
@@ -229,10 +230,9 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                     if (field.getDeclaringClass().isAssignableFrom(fieldTargetObj.getClass())) {
                         field.set(fieldTargetObj, fieldValue);
                     }
-                    if (defaultValEcho && fieldValue != null && defaultValConfig(configEntity)) {
-                        configEntity.setValue(annotationValue);
-                        configEntity.setDesc("代码默认值回显");
-                        defaultValEchoConfigList.add(configEntity);
+                    if (defaultValEcho && fieldValue != null && isDefaultValConfig(configEntity)) {
+                        ConfigEntity defaultValConfigEntity = buildDefaultValConfigEntity(configEntity.getKey(), configValue, ClassUtils.getFullFieldName(field));
+                        defaultValEchoConfigList.add(defaultValConfigEntity);
                     }
                 }
             } catch (Exception e) {
@@ -245,7 +245,8 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
         return field.isAnnotationPresent(SmartValue.class);
     }
 
-    protected Object resolveValue(Field field, String annotationValue) {
+
+    protected String resolveValueStr(Field field, String annotationValue) {
         String fullFieldName = ClassUtils.getFullFieldName(field);
 
         // 解析默认值上可能存在的占位符
@@ -258,7 +259,17 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             throw new SmartConfigApplicationException(fullFieldName
                     + " cannot be null without a default value");
         }
+        return configValue;
+    }
 
+    @SuppressWarnings("unused")
+    protected Object resolveValue(Field field, String annotationValue) {
+        String configValue = resolveValueStr(field, annotationValue);
+        return toFieldType(field, configValue);
+    }
+
+    private Object toFieldType(Field field, String configValue) {
+        String fullFieldName = ClassUtils.getFullFieldName(field);
         if (isSimpleTypeAnnotation(field)) {
             Class<?> fieldType = field.getType();
 
@@ -325,7 +336,7 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
      * @param configEntity Config 实体
      * @return boolean
      */
-    private boolean defaultValConfig(ConfigEntity configEntity) {
+    private boolean isDefaultValConfig(ConfigEntity configEntity) {
         if (configEntity == null || StringUtils.isEmpty(configEntity.getKey())) {
             return false;
         }
@@ -335,5 +346,12 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
                 && configEntity.getCreateDate() == null
                 && configEntity.getUpdateDate() == null
                 && !Boolean.TRUE.equals(configEntity.isDurable());
+    }
+
+    private ConfigEntity buildDefaultValConfigEntity(String key, String value, String desc) {
+        ConfigEntity configEntity = new ConfigEntity(key, value, ReleaseStatusEnum.RELEASE.getCode());
+        configEntity.setDesc("默认值: " + desc);
+        configEntity.setCreateDate(new Date());
+        return configEntity;
     }
 }

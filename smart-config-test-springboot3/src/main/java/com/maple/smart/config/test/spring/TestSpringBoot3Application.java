@@ -40,6 +40,9 @@ public class TestSpringBoot3Application {
     @JsonValue("${key-json:{}}")
     private Object test04;
 
+    @JsonValue("${key-json:{\"aaa\":\"bbb\"}}")
+    private Object test05;
+
 
     public static void main(String[] args) throws Exception {
 
