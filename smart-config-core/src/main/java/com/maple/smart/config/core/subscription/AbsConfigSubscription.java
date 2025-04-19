@@ -138,6 +138,11 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
             this.propertyInject(configEntity, focusFieldList);
         }
 
+        defaultValEcho();
+    }
+
+    @Override
+    public void defaultValEcho() {
         // 默认值回显
         if (!defaultValEcho && defaultValEchoConfigList.isEmpty()) {
             return;
