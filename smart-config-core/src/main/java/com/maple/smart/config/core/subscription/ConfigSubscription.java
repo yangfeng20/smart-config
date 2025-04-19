@@ -70,4 +70,9 @@ public interface ConfigSubscription {
     void setConfigRepository(ConfigRepository configRepository);
 
     void setDefaultValEcho(boolean defaultValEcho);
+
+    /**
+     * 默认值回显
+     */
+    void defaultValEcho();
 }

@@ -76,7 +76,10 @@ public class SpringConfigBootstrap extends AbsConfigBootstrap {
     @Override
     public void refreshConfig() {
         // spring应用不需要手动刷新（触发字段赋值）；在beanPostProcessor中处理了
-        configSubscription.refresh(configRepository);
+        //configSubscription.refresh(configRepository);
+        if (defaultValEcho) {
+            configSubscription.defaultValEcho();
+        }
         if (!started) {
             startWebUi();
             started = true;
