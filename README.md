@@ -38,13 +38,33 @@
    <version>1.0.3</version>
 </dependency>
 ```
-- springboot3需要做单独的代码兼容，所以版本独立发布。如果使用的是springboot3，请在正常版本后添加[-springboot3];例如：
+- springboot3需要做单独的代码兼容，所以版本独立发布。
+- 如果使用的是springboot3，请在正常版本后添加[-springboot3]
+- 例如：
 ```xml
 <dependency>
    <groupId>io.github.yangfeng20</groupId>
    <artifactId>smart-config-core</artifactId>
    <version>1.0.3-springboot3</version>
 </dependency>
+```
+
+- 同时由于springboot3中web-starter也引入了jetty依赖
+- 会发生依赖冲突，最终类找不到
+- 需要引入依赖管理，并指定jetty版本，强制使用jetty 11.0.20版本
+```xml
+    <dependencyManagement>
+        <dependencies>
+            <!--smart-config jetty-->
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-bom</artifactId>
+                <version>11.0.20</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 ```
 
 
