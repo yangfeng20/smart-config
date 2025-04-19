@@ -1,9 +1,12 @@
 package com.maple.smart.config.core.boot;
 
+import com.maple.smart.config.core.inject.PropertyInject;
 import com.maple.smart.config.core.listener.ConfigListener;
 import com.maple.smart.config.core.loader.ConfigLoader;
 import com.maple.smart.config.core.repository.ConfigRepository;
+import com.maple.smart.config.core.spring.PropertySubscriptionInjectBeanPostProcessor;
 import com.maple.smart.config.core.subscription.ConfigSubscription;
+import org.springframework.beans.PropertyValues;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 
 import java.util.List;
@@ -50,11 +53,30 @@ public class SpringConfigBootstrap extends AbsConfigBootstrap {
                 });
     }
 
+
+    /**
+     * 在spring中，最终还是需要调用refresh方法；再次触发字段赋值，确保默认值回显逻辑被执行
+     * <pre>
+     *{@code
+            configSubscription.refresh(configRepository);
+     *}<pre>
+     *  默认值回显
+     *  <pre>
+     * {@code
+     *          // 默认值回显
+     *         if (!defaultValEcho && defaultValEchoConfigList.isEmpty()) {
+     *             return;
+     *         }
+     *         configRepository.loader(defaultValEchoConfigList);
+     * }
+     *
+     * 最好不要移除下面方法的字段赋值逻辑，框架在初始化过程中，就需要或者字段的值，所以最好不要移除，页不能统一放到最后这里执行
+     * @see PropertySubscriptionInjectBeanPostProcessor#postProcessProperties(PropertyValues, Object, String)
+     */
     @Override
     public void refreshConfig() {
         // spring应用不需要手动刷新（触发字段赋值）；在beanPostProcessor中处理了
         configSubscription.refresh(configRepository);
-        // todo 这里导致无法回显，重复刷新会有问题吗？有问题件，要改造
         if (!started) {
             startWebUi();
             started = true;
