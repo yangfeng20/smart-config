@@ -95,7 +95,7 @@ public class WebOperationControlPanel {
                 // windows
                 jarPath = jarOriginalPath.replace("file:/", "").replace("!/", "");
             }
-            jarPath = URLDecoder.decode(jarPath, StandardCharsets.UTF_8);
+            jarPath = URLDecoder.decode(jarPath, StandardCharsets.UTF_8.name());
             inputStream = Files.newInputStream(Paths.get(jarPath));
         } else {
             // jar包 springboot环境

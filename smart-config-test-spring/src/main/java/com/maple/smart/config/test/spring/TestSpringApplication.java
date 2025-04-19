@@ -20,12 +20,14 @@ import javax.annotation.Resource;
  */
 
 @RestController
-@EnableSmartConfig
+@EnableSmartConfig(defaultValEcho = true)
 @EnableAspectJAutoProxy
 @SpringBootApplication
 public class TestSpringApplication {
     @Resource
     private Service01 service01;
+    @Resource
+    private Service02 service02;
 
 
     @SmartValue("${main.test01:1111}")
@@ -46,6 +48,8 @@ public class TestSpringApplication {
     @RequestMapping("/test01")
     public String test01() {
         service01.test01();
+        System.out.println("--------------------------");
+        service02.test01();
         return "success";
     }
 
