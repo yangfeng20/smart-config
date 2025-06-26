@@ -28,8 +28,8 @@ import java.util.ServiceLoader;
 public class LocalConfigBootstrap extends AbsConfigBootstrap {
 
 
-    public LocalConfigBootstrap(boolean descInfer,boolean defaultValEcho, int webUiPort, String localConfigPath, List<String> packagePathList) {
-        super(descInfer, webUiPort, localConfigPath, packagePathList, defaultValEcho);
+    public LocalConfigBootstrap(boolean descInfer, boolean defaultValEcho, int webUiPort, String localConfigPath, List<String> packagePathList, String conflictStrategy) {
+        super(descInfer, webUiPort, localConfigPath, packagePathList, defaultValEcho, conflictStrategy);
     }
 
     @Override

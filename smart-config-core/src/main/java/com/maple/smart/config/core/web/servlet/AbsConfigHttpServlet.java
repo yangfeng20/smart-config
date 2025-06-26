@@ -49,11 +49,41 @@ public abstract class AbsConfigHttpServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (req.getRequestURI().contains("/export")) {
+            String type = req.getParameter("type");
+            if (type == null || type.isEmpty()) {
+                type = "properties";
+            }
+            String content;
+            String fileName = "smart-config-export." + type;
+            String contentType;
+            com.maple.smart.config.core.export.ConfigExporter exporter;
+            switch (type.toLowerCase()) {
+                case "json":
+                    exporter = new com.maple.smart.config.core.export.JsonConfigExporter();
+                    contentType = "application/json;charset=utf-8";
+                    break;
+                case "yaml":
+                case "yml":
+                    exporter = new com.maple.smart.config.core.export.YamlConfigExporter();
+                    contentType = "application/x-yaml;charset=utf-8";
+                    break;
+                case "properties":
+                default:
+                    exporter = new com.maple.smart.config.core.export.PropertiesConfigExporter();
+                    contentType = "text/plain;charset=utf-8";
+            }
+            content = exporter.export(configRepository.configList());
+            resp.setContentType(contentType);
+            resp.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+            resp.getWriter().write(content);
+            return;
+        }
         super.doGet(req, resp);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Object data = null;
         JsonObject response = JSONFacade.createJsonObject();
         response.put("code", 200);

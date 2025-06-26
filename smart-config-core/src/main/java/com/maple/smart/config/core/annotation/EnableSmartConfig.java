@@ -75,4 +75,11 @@ public @interface EnableSmartConfig {
      * @return 是否开启
      */
     boolean defaultValEcho() default false;
+
+    /**
+     * 配置冲突解决策略，默认本地优先
+     * 可选：MERGE_WITH_LOCAL_PRIORITY、MERGE_WITH_TEMP_PRIORITY、OVERRIDE_LOCAL、KEEP_LOCAL
+     * 可通过 -Dsmart.config.conflict.strategy 覆盖
+     */
+    String conflictStrategy() default "MERGE_WITH_LOCAL_PRIORITY";
 }

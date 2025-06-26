@@ -20,7 +20,11 @@ import java.util.List;
 public class SpringConfigBootstrap extends AbsConfigBootstrap {
 
     public SpringConfigBootstrap(boolean descInfer, boolean defaultValEcho, int webUiPort, String localConfigPath, List<String> packagePathList) {
-        super(descInfer, webUiPort, localConfigPath, packagePathList, defaultValEcho);
+        super(descInfer, webUiPort, localConfigPath, packagePathList, defaultValEcho, "MERGE_WITH_LOCAL_PRIORITY");
+    }
+
+    public SpringConfigBootstrap(boolean descInfer, boolean defaultValEcho, int webUiPort, String localConfigPath, List<String> packagePathList, String conflictStrategy) {
+        super(descInfer, webUiPort, localConfigPath, packagePathList, defaultValEcho, conflictStrategy);
     }
 
     @Override
@@ -81,8 +85,7 @@ public class SpringConfigBootstrap extends AbsConfigBootstrap {
             configSubscription.defaultValEcho();
         }
         if (!started) {
-            startWebUi();
-            started = true;
+            doStart();
         }
     }
 }
