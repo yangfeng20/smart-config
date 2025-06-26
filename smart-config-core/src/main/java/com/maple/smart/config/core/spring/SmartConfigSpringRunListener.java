@@ -100,9 +100,15 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
             defaultValEcho = Boolean.parseBoolean(environment.getProperty("smart.config.default.echo"));
         }
 
-        log.debug("Smart-Config 加载配置 descInfer: {} webUiPort: {} configLocation: {} defaultValEcho:{}",
-                descInfer, webUiPort, configLocation, defaultValEcho);
-        smartConfigBootstrap = new SpringConfigBootstrap(descInfer, defaultValEcho, webUiPort, configLocation, Collections.emptyList());
+        // 读取冲突策略，优先系统属性，其次注解默认值
+        String conflictStrategy = environment.getProperty("smart.config.conflict.strategy");
+        if (conflictStrategy == null || conflictStrategy.isEmpty()) {
+            conflictStrategy = enableSmartConfig.conflictStrategy();
+        }
+
+        log.debug("Smart-Config 加载配置 descInfer: {} webUiPort: {} configLocation: {} defaultValEcho:{} conflictStrategy:{}",
+                descInfer, webUiPort, configLocation, defaultValEcho, conflictStrategy);
+        smartConfigBootstrap = new SpringConfigBootstrap(descInfer, defaultValEcho, webUiPort, configLocation, Collections.emptyList(), conflictStrategy);
         smartConfigBootstrap.init();
     }
 
