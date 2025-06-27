@@ -3,6 +3,7 @@ package com.maple.smart.config.core.boot;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.core.status.Status;
+import com.maple.smart.config.core.conflict.ConfigConflictResolver;
 import com.maple.smart.config.core.exp.SmartConfigApplicationException;
 import com.maple.smart.config.core.listener.ConfigListener;
 import com.maple.smart.config.core.loader.ConfigLoader;
@@ -79,6 +80,10 @@ public class LocalConfigBootstrap extends AbsConfigBootstrap {
             configListener.setConfigSubscription(this.configSubscription);
             configSubscription.addListener(configListener);
         });
+
+        // SPI自动加载自定义冲突策略
+        ServiceLoader.load(ConfigConflictResolver.class)
+                .forEach(this.conflictResolutionManager::registerCustomResolver);
     }
 
     /**

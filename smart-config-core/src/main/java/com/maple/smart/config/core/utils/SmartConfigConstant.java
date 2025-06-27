@@ -12,8 +12,5 @@ public class SmartConfigConstant {
 
     private final static String APP_NAME = "smart-config-core";
 
-    private final static String VERSION = "1.0.1";
-
-    @Deprecated
-    public final static String JAR_FILE_PATH = LIB_PATH + APP_NAME + "-" + VERSION + ".jar";
+    private final static String VERSION = "1.0.2";
 }

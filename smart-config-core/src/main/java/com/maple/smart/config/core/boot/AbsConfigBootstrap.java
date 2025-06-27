@@ -1,11 +1,14 @@
 package com.maple.smart.config.core.boot;
 
+import com.maple.smart.config.core.conflict.ConfigConflictResolver;
+import com.maple.smart.config.core.conflict.ConflictResolutionManager;
 import com.maple.smart.config.core.control.WebOperationControlPanel;
 import com.maple.smart.config.core.exp.SmartConfigApplicationException;
 import com.maple.smart.config.core.loader.ConfigLoader;
 import com.maple.smart.config.core.model.ConfigEntity;
 import com.maple.smart.config.core.persistence.ConfigPersistenceManager;
 import com.maple.smart.config.core.persistence.PersistenceScheduler;
+import com.maple.smart.config.core.persistence.TempDirectoryPersistenceManager;
 import com.maple.smart.config.core.repository.ConfigRepository;
 import com.maple.smart.config.core.subscription.ConfigSubscription;
 import lombok.Getter;
@@ -63,25 +66,32 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
     protected final List<ConfigLoader> configLoaderList = new ArrayList<>();
 
     protected final String conflictStrategy;
-    protected final com.maple.smart.config.core.conflict.ConflictResolutionManager conflictResolutionManager = new com.maple.smart.config.core.conflict.ConflictResolutionManager();
+
+    protected final ConflictResolutionManager conflictResolutionManager = new ConflictResolutionManager();
 
     protected ConfigPersistenceManager configPersistenceManager;
     protected PersistenceScheduler persistenceScheduler;
 
     // 默认5分钟
-    protected long persistenceIntervalMs = 300_000L;
+    protected long persistenceIntervalMinutes = 60;
+
+    protected ConfigConflictResolver customResolver;
+
+    protected final String projectName;
 
     public AbsConfigBootstrap(boolean descInfer, int webUiPort, String localConfigPath, List<String> packagePathList, String conflictStrategy) {
-        this.descInfer = descInfer;
-        this.webUiPort = webUiPort;
-        this.localConfigPath = localConfigPath;
-        this.packagePathList = packagePathList;
-        this.defaultValEcho = false;
-        this.conflictStrategy = conflictStrategy;
-        this.conflictResolutionManager.setCurrentStrategy(conflictStrategy);
+        this(descInfer, webUiPort, localConfigPath, packagePathList, false, conflictStrategy, null, resolveProjectName());
     }
 
     public AbsConfigBootstrap(boolean descInfer, int webUiPort, String localConfigPath, List<String> packagePathList, boolean defaultValEcho, String conflictStrategy) {
+        this(descInfer, webUiPort, localConfigPath, packagePathList, defaultValEcho, conflictStrategy, null, resolveProjectName());
+    }
+
+    public AbsConfigBootstrap(boolean descInfer, int webUiPort, String localConfigPath, List<String> packagePathList, boolean defaultValEcho, String conflictStrategy, ConfigConflictResolver customResolver) {
+        this(descInfer, webUiPort, localConfigPath, packagePathList, defaultValEcho, conflictStrategy, customResolver, resolveProjectName());
+    }
+
+    public AbsConfigBootstrap(boolean descInfer, int webUiPort, String localConfigPath, List<String> packagePathList, boolean defaultValEcho, String conflictStrategy, ConfigConflictResolver customResolver, String projectName) {
         this.descInfer = descInfer;
         this.webUiPort = webUiPort;
         this.localConfigPath = localConfigPath;
@@ -89,6 +99,11 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
         this.defaultValEcho = defaultValEcho;
         this.conflictStrategy = conflictStrategy;
         this.conflictResolutionManager.setCurrentStrategy(conflictStrategy);
+        this.customResolver = customResolver;
+        if (customResolver != null) {
+            this.conflictResolutionManager.registerCustomResolver(customResolver);
+        }
+        this.projectName = projectName;
     }
 
 
@@ -135,7 +150,7 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
         }
 
         // 2. 加载临时目录配置
-        configPersistenceManager = new com.maple.smart.config.core.persistence.TempDirectoryPersistenceManager();
+        configPersistenceManager = new TempDirectoryPersistenceManager(projectName);
         Collection<ConfigEntity> tempConfigs = configPersistenceManager.load();
 
         // 3. 合并配置
@@ -153,7 +168,7 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
         startWebUi();
 
         // 启动配置定时持久化
-        persistenceScheduler = new com.maple.smart.config.core.persistence.PersistenceScheduler(configPersistenceManager, configRepository, persistenceIntervalMs);
+        persistenceScheduler = new PersistenceScheduler(configPersistenceManager, configRepository, persistenceIntervalMinutes);
         persistenceScheduler.start();
 
         started = true;
@@ -201,21 +216,35 @@ public abstract class AbsConfigBootstrap implements SmartConfigBootstrap {
     }
 
     /**
-     * 获取最终冲突策略名，优先系统属性，其次默认值
+     * 获取项目名，优先级：
+     * 1. Spring环境 application.name
+     * 2. 系统属性 smart.config.project.name
+     * 3. 环境变量 SMART_CONFIG_PROJECT_NAME
+     * 4. 当前工作目录名
      */
-    public static String resolveConflictStrategy(String defaultStrategy) {
-        String sys = System.getProperty("smart.config.conflict.strategy");
-        if (sys != null && !sys.isEmpty()) {
-            return sys;
+    public static String resolveProjectName(org.springframework.core.env.Environment env) {
+        String name = null;
+        if (env != null) {
+            name = env.getProperty("spring.application.name");
         }
-        return defaultStrategy;
+        if (name == null || name.isEmpty()) {
+            name = System.getProperty("smart.config.project.name");
+        }
+        if (name == null || name.isEmpty()) {
+            name = System.getenv("SMART_CONFIG_PROJECT_NAME");
+        }
+        if (name == null || name.isEmpty()) {
+            try {
+                name = new java.io.File(".").getCanonicalFile().getName();
+            } catch (Exception ignore) {}
+        }
+        return name == null ? "default" : name;
     }
 
     /**
-     * 导出当前内存中所有配置（JSON格式）
+     * 获取项目名，非Spring环境优先系统属性/环境变量/工作目录名
      */
-    public String exportConfigAsJson() {
-        com.maple.smart.config.core.export.ConfigExporter exporter = new com.maple.smart.config.core.export.JsonConfigExporter();
-        return exporter.export(configRepository.configList());
+    public static String resolveProjectName() {
+        return resolveProjectName(null);
     }
 }

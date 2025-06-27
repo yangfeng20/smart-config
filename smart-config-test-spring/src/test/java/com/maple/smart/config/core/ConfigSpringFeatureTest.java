@@ -23,7 +23,7 @@ public class ConfigSpringFeatureTest {
 
     @Test
     public void testPersistenceAndLoad() {
-        TempDirectoryPersistenceManager pm = new TempDirectoryPersistenceManager();
+        TempDirectoryPersistenceManager pm = new TempDirectoryPersistenceManager("");
         List<ConfigEntity> list = Arrays.asList(new ConfigEntity("a", "1", 1), new ConfigEntity("b", "2", 1));
         pm.persist(list);
         Collection<ConfigEntity> loaded = pm.load();
