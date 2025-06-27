@@ -32,7 +32,7 @@
         <dependency>
             <groupId>io.github.yangfeng20</groupId>
             <artifactId>smart-config-core</artifactId>
-            <version>1.0.3-springboot3-fix-1</version>
+            <version>1.0.4-springboot3-SNAPSHOT</version>
         </dependency>
 
         <dependency>

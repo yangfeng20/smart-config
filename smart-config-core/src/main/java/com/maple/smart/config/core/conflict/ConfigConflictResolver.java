@@ -4,7 +4,12 @@ import com.maple.smart.config.core.model.ConfigEntity;
 
 /**
  * 配置冲突解决策略接口
+ * <p>
+ * <p>
  * 所有默认与自定义策略均需实现该接口
+ *
+ * @author gaoping
+ * @since 2025/06/27
  */
 public interface ConfigConflictResolver {
     /**

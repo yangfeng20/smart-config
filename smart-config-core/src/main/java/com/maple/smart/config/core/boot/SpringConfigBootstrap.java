@@ -1,6 +1,6 @@
 package com.maple.smart.config.core.boot;
 
-import com.maple.smart.config.core.inject.PropertyInject;
+import com.maple.smart.config.core.conflict.ConfigConflictResolver;
 import com.maple.smart.config.core.listener.ConfigListener;
 import com.maple.smart.config.core.loader.ConfigLoader;
 import com.maple.smart.config.core.repository.ConfigRepository;
@@ -25,6 +25,14 @@ public class SpringConfigBootstrap extends AbsConfigBootstrap {
 
     public SpringConfigBootstrap(boolean descInfer, boolean defaultValEcho, int webUiPort, String localConfigPath, List<String> packagePathList, String conflictStrategy) {
         super(descInfer, webUiPort, localConfigPath, packagePathList, defaultValEcho, conflictStrategy);
+    }
+
+    public SpringConfigBootstrap(boolean descInfer, boolean defaultValEcho, int webUiPort, String localConfigPath, List<String> packagePathList, String conflictStrategy, ConfigConflictResolver customResolver) {
+        super(descInfer, webUiPort, localConfigPath, packagePathList, defaultValEcho, conflictStrategy, customResolver);
+    }
+
+    public SpringConfigBootstrap(boolean descInfer, boolean defaultValEcho, int webUiPort, String localConfigPath, List<String> packagePathList, String conflictStrategy, ConfigConflictResolver customResolver, String projectName) {
+        super(descInfer, webUiPort, localConfigPath, packagePathList, defaultValEcho, conflictStrategy, customResolver, projectName);
     }
 
     @Override
@@ -55,6 +63,10 @@ public class SpringConfigBootstrap extends AbsConfigBootstrap {
                     configListener.setConfigSubscription(this.configSubscription);
                     configSubscription.addListener(configListener);
                 });
+
+        // SPI自动加载自定义冲突策略
+        java.util.ServiceLoader.load(ConfigConflictResolver.class)
+                .forEach(this.conflictResolutionManager::registerCustomResolver);
     }
 
 

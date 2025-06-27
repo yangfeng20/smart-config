@@ -10,24 +10,27 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 定时持久化调度器
+ *
+ * @author gaoping
+ * @since 2025/06/27
  */
 public class PersistenceScheduler {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final ConfigPersistenceManager persistenceManager;
     private final ConfigRepository configRepository;
-    private final long intervalMs;
+    private final long intervalMinutes;
 
-    public PersistenceScheduler(ConfigPersistenceManager persistenceManager, ConfigRepository configRepository, long intervalMs) {
+    public PersistenceScheduler(ConfigPersistenceManager persistenceManager, ConfigRepository configRepository, long intervalMinutes) {
         this.persistenceManager = persistenceManager;
         this.configRepository = configRepository;
-        this.intervalMs = intervalMs;
+        this.intervalMinutes = intervalMinutes;
     }
 
     public void start() {
         scheduler.scheduleAtFixedRate(() -> {
             Collection<ConfigEntity> configs = configRepository.configList();
             persistenceManager.persist(configs);
-        }, 10, intervalMs, TimeUnit.SECONDS);
+        }, intervalMinutes, intervalMinutes, TimeUnit.MINUTES);
     }
 
     public void stop() {

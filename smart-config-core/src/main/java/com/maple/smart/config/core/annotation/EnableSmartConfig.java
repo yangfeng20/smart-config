@@ -1,5 +1,7 @@
 package com.maple.smart.config.core.annotation;
 
+import com.maple.smart.config.core.conflict.ConfigConflictResolver;
+import com.maple.smart.config.core.conflict.ConflictStrategyEnum;
 import com.maple.smart.config.core.spring.PropertySubscriptionInjectBeanPostProcessor;
 import com.maple.smart.config.core.spring.SmartConfigSpringContext;
 import org.springframework.context.annotation.Import;
@@ -77,9 +79,15 @@ public @interface EnableSmartConfig {
     boolean defaultValEcho() default false;
 
     /**
+     * 自定义冲突解决策略类（可选）
+     * 若指定则优先使用自定义实现，否则用conflictStrategy枚举
+     */
+    Class<? extends ConfigConflictResolver> customResolver() default ConfigConflictResolver.class;
+
+    /**
      * 配置冲突解决策略，默认本地优先
      * 可选：MERGE_WITH_LOCAL_PRIORITY、MERGE_WITH_TEMP_PRIORITY、OVERRIDE_LOCAL、KEEP_LOCAL
      * 可通过 -Dsmart.config.conflict.strategy 覆盖
      */
-    String conflictStrategy() default "MERGE_WITH_LOCAL_PRIORITY";
+    ConflictStrategyEnum conflictStrategy() default ConflictStrategyEnum.MERGE_WITH_LOCAL_PRIORITY;
 }

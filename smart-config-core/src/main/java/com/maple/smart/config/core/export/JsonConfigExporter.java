@@ -7,6 +7,9 @@ import java.util.Collection;
 
 /**
  * JSON格式配置导出实现
+ *
+ * @author gaoping
+ * @since 2025/06/27
  */
 public class JsonConfigExporter implements ConfigExporter {
     private final ObjectMapper objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);

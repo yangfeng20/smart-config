@@ -2,6 +2,7 @@ package com.maple.smart.config.core.web.servlet;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.maple.smart.config.core.exp.SmartConfigApplicationException;
+import com.maple.smart.config.core.export.ConfigExporter;
 import com.maple.smart.config.core.infrastructure.json.JSONFacade;
 import com.maple.smart.config.core.infrastructure.json.JsonObject;
 import com.maple.smart.config.core.model.ConfigEntity;
@@ -57,7 +58,7 @@ public abstract class AbsConfigHttpServlet extends HttpServlet {
             String content;
             String fileName = "smart-config-export." + type;
             String contentType;
-            com.maple.smart.config.core.export.ConfigExporter exporter;
+            ConfigExporter exporter;
             switch (type.toLowerCase()) {
                 case "json":
                     exporter = new com.maple.smart.config.core.export.JsonConfigExporter();

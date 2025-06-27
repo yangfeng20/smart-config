@@ -1,15 +1,19 @@
 package com.maple.smart.config.core;
 
-import com.maple.smart.config.core.boot.SpringConfigBootstrap;
+import com.maple.smart.config.core.annotation.EnableSmartConfig;
 import com.maple.smart.config.core.conflict.ConflictResolutionManager;
 import com.maple.smart.config.core.model.ConfigEntity;
 import com.maple.smart.config.core.persistence.TempDirectoryPersistenceManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import java.util.*;
 
-@SpringBootTest
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+@SpringBootTest(classes = ConfigSpringBoot3FeatureTest.class)
+@EnableSmartConfig
 public class ConfigSpringBoot3FeatureTest {
     @Test
     public void testConflictResolution() {
@@ -23,7 +27,7 @@ public class ConfigSpringBoot3FeatureTest {
 
     @Test
     public void testPersistenceAndLoad() {
-        TempDirectoryPersistenceManager pm = new TempDirectoryPersistenceManager();
+        TempDirectoryPersistenceManager pm = new TempDirectoryPersistenceManager("");
         List<ConfigEntity> list = Arrays.asList(new ConfigEntity("a", "1", 1), new ConfigEntity("b", "2", 1));
         pm.persist(list);
         Collection<ConfigEntity> loaded = pm.load();

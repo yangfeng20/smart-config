@@ -100,15 +100,28 @@ public class SmartConfigSpringRunListener implements SpringApplicationRunListene
             defaultValEcho = Boolean.parseBoolean(environment.getProperty("smart.config.default.echo"));
         }
 
+        // 读取自定义冲突策略类
+        Class<? extends com.maple.smart.config.core.conflict.ConfigConflictResolver> customResolverClass = enableSmartConfig.customResolver();
+        com.maple.smart.config.core.conflict.ConfigConflictResolver customResolver = null;
+        if (customResolverClass != null && !customResolverClass.equals(com.maple.smart.config.core.conflict.ConfigConflictResolver.class)) {
+            try {
+                customResolver = customResolverClass.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException("自定义冲突策略实例化失败: " + customResolverClass, e);
+            }
+        }
+
         // 读取冲突策略，优先系统属性，其次注解默认值
         String conflictStrategy = environment.getProperty("smart.config.conflict.strategy");
         if (conflictStrategy == null || conflictStrategy.isEmpty()) {
-            conflictStrategy = enableSmartConfig.conflictStrategy();
+            conflictStrategy = enableSmartConfig.conflictStrategy().name();
         }
 
-        log.debug("Smart-Config 加载配置 descInfer: {} webUiPort: {} configLocation: {} defaultValEcho:{} conflictStrategy:{}",
-                descInfer, webUiPort, configLocation, defaultValEcho, conflictStrategy);
-        smartConfigBootstrap = new SpringConfigBootstrap(descInfer, defaultValEcho, webUiPort, configLocation, Collections.emptyList(), conflictStrategy);
+        log.debug("Smart-Config 加载配置 descInfer: {} webUiPort: {} configLocation: {} defaultValEcho:{} conflictStrategy:{} customResolver:{}",
+                descInfer, webUiPort, configLocation, defaultValEcho, conflictStrategy, customResolverClass);
+        // 获取项目名（Spring环境优先 spring.application.name）
+        String projectName = com.maple.smart.config.core.boot.AbsConfigBootstrap.resolveProjectName(environment);
+        smartConfigBootstrap = new SpringConfigBootstrap(descInfer, defaultValEcho, webUiPort, configLocation, Collections.emptyList(), conflictStrategy, customResolver, projectName);
         smartConfigBootstrap.init();
     }
 
