@@ -5,6 +5,9 @@ import java.util.Collection;
 
 /**
  * 配置导出接口
+ *
+ * @author maple
+ * @since 2025/06/30
  */
 public interface ConfigExporter {
     /**

@@ -6,6 +6,9 @@ import java.util.Map;
 
 /**
  * 策略管理器，统一注册和调度所有冲突解决策略
+ *
+ * @author maple
+ * @since 2025/06/30
  */
 public class ConflictResolutionManager {
     private final Map<ConflictStrategyEnum, ConfigConflictResolver> resolverMap = new HashMap<>();

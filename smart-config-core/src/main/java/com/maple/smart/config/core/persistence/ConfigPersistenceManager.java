@@ -5,6 +5,9 @@ import java.util.Collection;
 
 /**
  * 配置持久化管理接口
+ *
+ * @author maple
+ * @since 2025/06/30
  */
 public interface ConfigPersistenceManager {
     /**

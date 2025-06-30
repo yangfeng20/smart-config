@@ -7,6 +7,9 @@ import java.util.Collection;
 
 /**
  * YAML格式配置导出实现
+ *
+ * @author maple
+ * @since 2025/06/30
  */
 public class YamlConfigExporter implements ConfigExporter {
     private final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());

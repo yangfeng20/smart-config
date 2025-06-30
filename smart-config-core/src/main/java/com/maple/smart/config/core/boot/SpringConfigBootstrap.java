@@ -65,7 +65,7 @@ public class SpringConfigBootstrap extends AbsConfigBootstrap {
                 });
 
         // SPI自动加载自定义冲突策略
-        java.util.ServiceLoader.load(ConfigConflictResolver.class)
+        SpringFactoriesLoader.loadFactories(ConfigConflictResolver.class, LocalConfigBootstrap.class.getClassLoader())
                 .forEach(this.conflictResolutionManager::registerCustomResolver);
     }
 
@@ -73,9 +73,9 @@ public class SpringConfigBootstrap extends AbsConfigBootstrap {
     /**
      * 在spring中，最终还是需要调用refresh方法；再次触发字段赋值，确保默认值回显逻辑被执行
      * <pre>
-     *{@code
-            configSubscription.refresh(configRepository);
-     *}<pre>
+     * {@code
+     * configSubscription.refresh(configRepository);
+     * }<pre>
      *  默认值回显
      *  <pre>
      * {@code
@@ -86,7 +86,7 @@ public class SpringConfigBootstrap extends AbsConfigBootstrap {
      *         configRepository.loader(defaultValEchoConfigList);
      * }
      *
-     * 最好不要移除下面方法的字段赋值逻辑，框架在初始化过程中，就需要或者字段的值，所以最好不要移除，页不能统一放到最后这里执行
+     * 最好不要移除下面方法的字段赋值逻辑，框架在初始化过程中，就需要或者字段的值，所以最好不要移除，也不能统一放到最后这里执行
      * @see PropertySubscriptionInjectBeanPostProcessor#postProcessProperties(PropertyValues, Object, String)
      */
     @Override

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 
 @RestController
-@EnableSmartConfig(descInfer = true, defaultValEcho = true)
+@EnableSmartConfig(descInfer = true, defaultValEcho = true, customResolver = CustomerConfigConflictResolver.class)
 @EnableAspectJAutoProxy
 @SpringBootApplication
 public class TestSpringBoot3Application {

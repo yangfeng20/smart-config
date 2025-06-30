@@ -3,7 +3,7 @@ package com.maple.smart.config.core.conflict;
 /**
  * 冲突策略枚举
  *
- * @author gaoping
+ * @author maple
  * @since 2025/06/27
  */
 public enum ConflictStrategyEnum {

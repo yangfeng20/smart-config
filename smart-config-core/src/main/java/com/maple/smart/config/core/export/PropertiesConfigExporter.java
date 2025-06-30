@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 
 /**
  * Properties格式配置导出实现
+ *
+ * @author maple
+ * @since 2025/06/30
  */
 public class PropertiesConfigExporter implements ConfigExporter {
     @Override

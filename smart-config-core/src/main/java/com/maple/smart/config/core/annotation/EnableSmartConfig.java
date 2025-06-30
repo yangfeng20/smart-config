@@ -81,6 +81,10 @@ public @interface EnableSmartConfig {
     /**
      * 自定义冲突解决策略类（可选）
      * 若指定则优先使用自定义实现，否则用conflictStrategy枚举
+     * <p>
+     * 也可通过spi机制指定自定义实现,spi实现会覆盖当前配置
+     * </p>
+     * {@link com.maple.smart.config.core.conflict.ConfigConflictResolver}
      */
     Class<? extends ConfigConflictResolver> customResolver() default ConfigConflictResolver.class;
 
