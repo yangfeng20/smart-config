@@ -55,7 +55,7 @@ public class TempDirectoryPersistenceManager implements ConfigPersistenceManager
 
         // 检测是否有无效的配置
         Optional<ConfigEntity> opt = result.stream().filter(configEntity -> configEntity.getKey() == null
-                || configEntity.getKey().isBlank()
+                || configEntity.getKey().isEmpty()
                 || configEntity.getCreateDate() == null).findAny();
 
         if (opt.isPresent()) {
