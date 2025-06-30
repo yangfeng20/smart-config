@@ -30,11 +30,13 @@ public class ConfigEntity {
 
     public ConfigEntity(String key) {
         this.key = key;
+        this.createDate = new Date();
     }
 
     public ConfigEntity(String key, String value, Integer releaseStatus) {
         this.key = key;
         this.value = value;
         this.status = releaseStatus;
+        this.createDate = new Date();
     }
 }

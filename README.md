@@ -17,6 +17,10 @@
 - 支持springboot多配置文件
 - 支持`spring.config.location`以及`spring.profiles.active`
 - 支持启动参数修改webUi端口以及配置描述推断
+- webUi支持默认值回显
+- 配置持久化，像使用微服务配置中心一样
+- 内置多种冲突策略，且可自定义冲突策略
+- 预留多种spi扩展接口（配置加载，配置变更，冲突合并...）
 
 
 
@@ -35,7 +39,7 @@
 <dependency>
    <groupId>io.github.yangfeng20</groupId>
    <artifactId>smart-config-core</artifactId>
-   <version>1.0.3</version>
+   <version>1.0.4</version>
 </dependency>
 ```
 - springboot3需要做单独的代码兼容，所以版本独立发布。
@@ -45,7 +49,7 @@
 <dependency>
    <groupId>io.github.yangfeng20</groupId>
    <artifactId>smart-config-core</artifactId>
-   <version>1.0.3-springboot3</version>
+   <version>1.0.4-springboot3</version>
 </dependency>
 ```
 
@@ -146,8 +150,9 @@
 
 ### 后续计划
 - [x] web配置中心展示默认值配置
-- 定时在操作系统临时目录保存一份最新配置；加载时合并
+- [x] 定时在操作系统临时目录保存一份最新配置；加载时合并
 - spel支持
 - 环境变量以及jvm参数数据源支持
-- 导出配置（最好格式不变）
+- [x] 导出配置（最好格式不变）
 - yaml格式文件支持
+- 配置增加数据来源字段（配置文件，系统临时文件，代码默认值...）

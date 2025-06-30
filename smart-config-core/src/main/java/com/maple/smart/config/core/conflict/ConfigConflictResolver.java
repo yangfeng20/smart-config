@@ -8,7 +8,7 @@ import com.maple.smart.config.core.model.ConfigEntity;
  * <p>
  * 所有默认与自定义策略均需实现该接口
  *
- * @author gaoping
+ * @author maple
  * @since 2025/06/27
  */
 public interface ConfigConflictResolver {
