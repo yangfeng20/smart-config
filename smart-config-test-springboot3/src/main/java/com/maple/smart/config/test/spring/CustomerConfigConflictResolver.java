@@ -13,7 +13,6 @@ import com.maple.smart.config.core.model.ReleaseStatusEnum;
 public class CustomerConfigConflictResolver extends MergeWithLocalPriorityResolver {
     @Override
     public ConfigEntity resolve(String key, ConfigEntity local, ConfigEntity temp) {
-        System.out.println("测试自定义策略执行");
         if ("prod".equals(key)) {
             return new ConfigEntity(key, "自定义数据", ReleaseStatusEnum.RELEASE.getCode());
         }
