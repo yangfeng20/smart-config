@@ -348,7 +348,6 @@ public abstract class AbsConfigSubscription implements ConfigSubscription, Prope
 
         return configEntity.getValue() == null && configEntity.getDesc() == null
                 && configEntity.getStatus() == null
-                && configEntity.getCreateDate() == null
                 && configEntity.getUpdateDate() == null
                 && !Boolean.TRUE.equals(configEntity.isDurable());
     }

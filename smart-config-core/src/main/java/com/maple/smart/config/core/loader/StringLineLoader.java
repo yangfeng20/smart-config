@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author maple
@@ -24,6 +27,9 @@ import java.util.List;
  */
 
 public class StringLineLoader extends AbsConfigLoader {
+
+    static Pattern pattern = Pattern.compile("\\\\u([0-9a-fA-F]{4})");
+
     @Override
     public Collection<ConfigEntity> loaderConfig(String path) {
         List<String> lineDataList = readConfigFile(path);
@@ -115,6 +121,34 @@ public class StringLineLoader extends AbsConfigLoader {
             throw new SmartConfigApplicationException("failed to load local configuration file [ " + path + " ]", e);
         }
 
-        return lineDataList;
+        // 处理idea中可能将配置文件编码为ascii码，转换为中文
+        return lineDataList.stream()
+                .map(StringLineLoader::decodeUnicodeEscapes)
+                .collect(Collectors.toList());
     }
+
+
+    /**
+     * 解码 Unicode 转义
+     * <p>
+     * 解决idea中配置文件编码为ascii码，转换为中文
+     * </p>
+     *
+     * @param input 输入
+     * @return {@link String }
+     */
+    public static String decodeUnicodeEscapes(String input) {
+        StringBuilder result = new StringBuilder();
+        Matcher matcher = pattern.matcher(input);
+        int last = 0;
+        while (matcher.find()) {
+            result.append(input, last, matcher.start());
+            int codePoint = Integer.parseInt(matcher.group(1), 16);
+            result.append((char) codePoint);
+            last = matcher.end();
+        }
+        result.append(input.substring(last));
+        return result.toString();
+    }
+
 }
