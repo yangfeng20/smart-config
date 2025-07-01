@@ -78,7 +78,7 @@
       <dependency>
           <groupId>io.github.yangfeng20</groupId>
           <artifactId>smart-config-core</artifactId>
-          <version>1.0.4-SNAPSHOT</version>
+          <version>1.0.4</version>
       </dependency>
 
       <dependency>
